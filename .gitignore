@@ -1,0 +1,4 @@
+# Environment variables
+easybudget_client/.env
+easybudget_client/.env.local
+easybudget_client/.env.production
