@@ -8,9 +8,12 @@ import Wallet from "./pages/Wallet/Wallet"
 import Transaction from "./pages/Transactions/Transaction"
 import Budget from "./pages/Budgets/Budget"
 import Goal from "./pages/Goal/Goal"
+import Report from "./pages/Reports/Report";
+import Profile from "./pages/Profile/Profile";
 import { PageTransition } from "./components/ui/PageTransition";
 import OverlayBackground from "./components/ui/OverlayBackground";
 import { useRef, useMemo } from "react";
+import GoogleAuthSuccess from "./routes/AuthSuccess";
 
 function App() {
   const location = useLocation();
@@ -101,7 +104,16 @@ function App() {
             path="/report"
             element={
               <PageTransition forward={forward}>
-                <Goal />
+                <Report />
+              </PageTransition>
+            }
+             />
+             <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
+                         <Route 
+            path="/profile"
+            element={
+              <PageTransition forward={forward}>
+                <Profile />
               </PageTransition>
             }
              />

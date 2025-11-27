@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import dashboardIcon from "../../assets/icons/bar-chart-2.svg"
 import logo from "../../../public/favicon_white.svg";
 import walletIcon from "../../assets/icons/wallet.svg"
@@ -6,7 +7,9 @@ import budgetIcon from "../../assets/icons/budget.svg"
 import goalsIcon from "../../assets/icons/goals.svg"
 import reportIcon from "../../assets/icons/report.svg"
 import userIcon from "../../assets/icons/user.svg"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+import api from "../../api/axios";
 export function Sidebar () {
     return (
               <div className="fixed top-0 left-0 w-[18%] h-full bg-[#15213F] z-30">
@@ -100,8 +103,12 @@ export function Sidebar () {
 }
 
 export function Header() {
+  
+      const navigate = useNavigate();
       const location = useLocation();
-
+      const auth = useAuth(); // hasil decode token
+      const [userData, setUserData] = useState(null);
+      const token = localStorage.getItem("token");
         const pageTitles = {
     "/dashboard": "Dashboard",
     "/wallet": "Wallet",
@@ -112,6 +119,26 @@ export function Header() {
   };
 
   const currentTitle = pageTitles[location.pathname] || "Easy Budget";
+
+    useEffect(() => {
+    const fetchUser = async () => {
+      if (!auth?.user_id) return; // token invalid / belum login
+
+      try {
+        const res = await api.get(`/users/${auth.user_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        setUserData(res.data.data);
+      } catch (error) {
+        console.error("Failed fetch user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
     return (
         <div className="fixed top-0 left-[18%] w-[82%] h-[10%] bg-[ffffff] z-20 flex font-bold text-lg text-black">
         <div className="w-[80%] h-full flex items-center font-gabarito font-bold text-[2rem] pl-[1rem]">
@@ -119,9 +146,9 @@ export function Header() {
         </div>
         <div className="w-[20%] h-full">
             <div className="w-full h-full flex items-center justify-end">
-            <div className="w-[4.5rem] h-[4.5rem] bg-[skyblue] rounded-full mr-[3rem] flex items-center justify-center">
-                <img src={userIcon} alt="User" className="w-[2rem]" />
-            </div>
+            <button onClick={() => navigate("/profile")} className="w-[4.5rem] h-[4.5rem] cursor-pointer bg-[skyblue] rounded-full mr-[3rem] flex items-center justify-center overflow-hidden">
+                <img src={userData?.photo_url} alt="User" className=" w-full h-full object-cover rounded-full" />
+            </button>
             </div>
         </div>
       </div>
