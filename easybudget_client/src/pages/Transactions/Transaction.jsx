@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
 import { 
   Search, Filter, ChevronLeft, ChevronRight, Plus, 
-  Calendar, ArrowUpCircle, ArrowDownCircle, Edit, Trash2 
+  Calendar, ArrowUpCircle, ArrowDownCircle, Edit, Trash2, Tag // Tambah icon Tag
 } from "lucide-react";
 import api from "../../api/axios";
 import EditTransactionModal from "./EditTransactionModal";
 import AddTransactionModal from "./AddTransactionModal";
+import AddCategoryModal from "./AddCategoryModal"; // <--- Import Component Baru
 import "../../assets/styles/global.css";
 
 export default function Transactions() {
@@ -45,9 +46,12 @@ export default function Transactions() {
     });
   };
 
+  // State Modals
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false); // <--- State Modal Kategori
+
   // --- API CALL ---
   const fetchTransactions = async () => {
     setLoading(true);
@@ -142,29 +146,43 @@ export default function Transactions() {
     fetchTransactions();
   };
 
+  // Handler Sukses Tambah Kategori
+  const handleCategorySuccess = () => {
+    // Opsional: Lakukan sesuatu setelah kategori ditambah, misal notif
+    // Tidak perlu fetchTransactions karena list transaksi tidak berubah
+  };
+
   return (
     <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito">
       <Sidebar />
       <Header />
 
+      {/* --- MODALS --- */}
       <AddTransactionModal 
           isOpen={isAddModalOpen} 
           onClose={() => setIsAddModalOpen(false)} 
           onSuccess={handleAddSuccess}
-        />
+      />
 
       <EditTransactionModal 
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={handleEditSuccess}
           transactionData={selectedTransaction}
-        />
+      />
 
-      {/* --- CONTAINER UTAMA (Sesuai Wallet.jsx) --- */}
+      {/* Modal Tambah Kategori */}
+      <AddCategoryModal 
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          onSuccess={handleCategorySuccess}
+      />
+
+      {/* --- CONTAINER UTAMA --- */}
       <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-4 z-10">
         <div className="h-auto pb-10 flex items-center justify-start flex-col w-full">
           
-          {/* WRAPPER KONTEN (Agar lebar rapi) */}
+          {/* WRAPPER KONTEN */}
           <div className="w-full px-6 mt-4">
 
             {/* HEADER PAGE */}
@@ -173,12 +191,26 @@ export default function Transactions() {
                 <h1 className="text-3xl font-bold text-gray-800">Daftar Transaksi</h1>
                 <p className="text-gray-500 mt-1">Kelola dan pantau arus keuanganmu.</p>
               </div>
-              <button 
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
-                <Plus size={20} />
-                Tambah Transaksi
-              </button>
+              
+              <div className="flex gap-3">
+                {/* Tombol Tambah Kategori (Secondary Button) */}
+                <button 
+                  onClick={() => setIsCategoryModalOpen(true)}
+                  className="flex items-center gap-2 px-5 py-3 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition shadow-sm border border-gray-200"
+                >
+                  <Tag size={20} />
+                  Kategori Baru
+                </button>
+
+                {/* Tombol Tambah Transaksi (Primary Button) */}
+                <button 
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200"
+                >
+                  <Plus size={20} />
+                  Tambah Transaksi
+                </button>
+              </div>
             </div>
 
             {/* FILTER BAR CARD */}
@@ -299,8 +331,8 @@ export default function Transactions() {
                           <td className="p-4 align-top text-center">
                             <div className="flex items-center justify-center gap-2">
                               <button
-                              onClick={() => handleEditClick(tx)}
-                               className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                                onClick={() => handleEditClick(tx)}
+                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                                   <Edit size={16} />
                               </button>
                               <button 

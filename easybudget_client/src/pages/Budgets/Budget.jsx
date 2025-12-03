@@ -1,85 +1,165 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
+import { Plus, Edit2, Trash2, X, Save, Loader2 } from "lucide-react";
+import api from "../../api/axios";
+import "../../assets/styles/global.css";
 
 export default function Budget() {
-  const transactionCategories = [
-    "Makanan/Minuman",
-    "Pakaian",
-    "Bensin",
-    "Kesehatan",
-    "Hiburan",
-  ];
-
-  // contoh data awal supaya list tidak kosong
-  const [budgets, setBudgets] = useState([
-    { id: 1, name: "Makanan/Minuman", spent: 1000000, limit: 2000000 },
-    { id: 2, name: "Pakaian", spent: 1200000, limit: 2000000 },
-    { id: 3, name: "Bensin", spent: 1900000, limit: 2000000 },
-  ]);
-
-  const [editData, setEditData] = useState(null);
-  const [showAdd, setShowAdd] = useState(false);
-
+  const [budgets, setBudgets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]); // Untuk dropdown saat tambah budget
   
+  // State Modal Tambah
+  const [showAdd, setShowAdd] = useState(false);
   const [newBudget, setNewBudget] = useState({
-    name: "",
-    limit: "", 
+    category_id: "",
+    amount: "",
+    period_start: "",
+    period_end: ""
   });
 
-  
-  const usedCategories = budgets.map((b) => b.name);
-  const availableCategories = transactionCategories.filter(
-    (cat) => !usedCategories.includes(cat)
-  );
-  
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-  ];
+  // State Modal Edit
+  const [editData, setEditData] = useState(null);
 
-  const today = new Date();
-  const currentMonth = monthNames[today.getMonth()];
-  const currentYear = today.getFullYear();
+  const token = localStorage.getItem("token");
 
-  const getBarColor = (percent) => {
-    if (percent <= 40) return "bg-green-500";
-    if (percent <= 80) return "bg-blue-500";
-    return "bg-red-500";
+  // --- HELPER ---
+  const getUserIdFromToken = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload).user_id;
+    } catch (e) { return null; }
+  };
+
+  const formatRupiah = (num) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(num);
   };
 
   const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  const handleUpdate = () => {
-    const cleanLimit = Number(editData.limit.toString().replace(/\./g, "")); 
-
-    if (!editData.name || !cleanLimit || cleanLimit <= 0) return;
-
-    setBudgets((prev) =>
-      prev.map((b) => (b.id === editData.id ? { ...editData, limit: cleanLimit } : b))
-    );
-    setEditData(null);
+  const getBarColor = (percent) => {
+    if (percent <= 50) return "bg-green-500";
+    if (percent <= 80) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
-  const handleAdd = () => {
-    const cleanLimit = Number(newBudget.limit.replace(/\./g, ""));
+  const categoryIcons = {
+    "Makanan/Minuman": { icon: "🍔", color: "bg-orange-500" },
+    "Pakaian": { icon: "👕", color: "bg-blue-500" },
+    "Bensin": { icon: "⛽", color: "bg-red-500" },
+    "Kesehatan": { icon: "🏥", color: "bg-green-500" },
+    "Hiburan": { icon: "🎬", color: "bg-purple-500" },
+    "Transportasi": { icon: "🚗", color: "bg-indigo-500" },
+    "Belanja": { icon: "🛍️", color: "bg-pink-500" },
+    // Default fallback
+    "Default": { icon: "💰", color: "bg-gray-400" }
+  };
 
-    if (!newBudget.name || !cleanLimit || cleanLimit <= 0) return;
+  // --- API CALLS ---
+  const fetchBudgets = async () => {
+    const userId = getUserIdFromToken(token);
+    if (!userId) return;
 
-    if (usedCategories.includes(newBudget.name)) {
-        alert(`Kategori "${newBudget.name}" sudah memiliki budget.`);
+    try {
+      setLoading(true);
+      // Panggil 2 API: Get Budgets & Get Categories (untuk dropdown)
+      const [resBudgets, resCategories] = await Promise.all([
+        api.get(`/budgets/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+        api.get(`/categories/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+
+      setBudgets(resBudgets.data.data);
+      // Filter kategori hanya tipe 'expense'
+      setCategories(resCategories.data.data.filter(c => c.type === 'expense'));
+    } catch (err) {
+      console.error("Gagal load data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchBudgets();
+  }, [token]);
+
+  // --- HANDLERS ---
+  const handleAdd = async () => {
+    if (!newBudget.category_id || !newBudget.amount) {
+        alert("Mohon lengkapi data");
         return;
     }
 
-    setBudgets((prev) => [
-      ...prev,
-      { id: Date.now(), name: newBudget.name, spent: 0, limit: cleanLimit },
-    ]);
+    try {
+        // Set default tanggal bulan ini jika kosong
+        const date = new Date();
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
 
-    setNewBudget({ name: "", limit: "" });
-    setShowAdd(false);
+        const payload = {
+            category_id: newBudget.category_id,
+            amount: newBudget.amount.replace(/\./g, ""), // Hapus titik format
+            period_start: newBudget.period_start || firstDay,
+            period_end: newBudget.period_end || lastDay
+        };
+
+        await api.post("/budgets", payload, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        fetchBudgets();
+        setShowAdd(false);
+        setNewBudget({ category_id: "", amount: "", period_start: "", period_end: "" });
+    } catch (err) {
+        alert(err.response?.data?.message || "Gagal menambah budget");
+    }
   };
+
+  const handleUpdate = async () => {
+    try {
+        const cleanAmount = editData.limit.toString().replace(/\./g, "");
+        
+        await api.patch(`/budgets/${editData.id}`, {
+            amount: cleanAmount
+        }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        fetchBudgets();
+        setEditData(null);
+    } catch (err) {
+        alert("Gagal update budget");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm("Yakin ingin menghapus budget ini?")) {
+        try {
+            await api.delete(`/budgets/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchBudgets();
+        } catch (err) {
+            alert("Gagal menghapus budget");
+        }
+    }
+  };
+
+  // Setup tanggal header
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  ];
+  const today = new Date();
+  const currentMonth = monthNames[today.getMonth()];
+  const currentYear = today.getFullYear();
 
   return (
     <div className="min-h-screen bg-gray-100 font-gabarito">
@@ -87,137 +167,163 @@ export default function Budget() {
       <Header />
 
       <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] p-8 overflow-y-auto rounded-lg">
-        <div className="relative bg-white w-full p-8 rounded-2xl shadow-lg">
+        <div className="relative bg-white w-full p-8 rounded-2xl shadow-lg min-h-[80vh]">
 
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold">Budget</h1>
-            <p className="text-black text-[32px] font-bold mt-1">
-              Budget {currentMonth}, {currentYear}
-            </p>
+          {/* Header Section */}
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Budget Planning</h1>
+              <p className="text-gray-500 text-lg mt-1">
+                Periode {currentMonth} {currentYear}
+              </p>
+            </div>
+            
+            {/* Tombol Tambah */}
+            <button
+              onClick={() => setShowAdd(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all font-semibold"
+            >
+              <Plus size={20} />
+              Tambah Budget
+            </button>
           </div>
 
-          {/* List budget */}
-          <div className="mt-8 space-y-8 pb-24">
-            {budgets.map((item) => {
-              const percent = Math.round((item.spent / item.limit) * 100);
-              const barColor = getBarColor(percent);
+          {/* List Budget */}
+          {loading ? (
+            <div className="text-center py-20 text-gray-400">Loading budgets...</div>
+          ) : budgets.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <p className="text-gray-400 text-lg">Belum ada budget bulan ini.</p>
+                <button onClick={() => setShowAdd(true)} className="text-blue-600 font-semibold mt-2 hover:underline">
+                    Buat sekarang
+                </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 pb-24">
+              {budgets.map((item) => {
+                // Mapping data dari backend ke variable frontend
+                const budgetId = item.budget_id;
+                const categoryName = item.category_name;
+                const limit = Number(item.limit_amount);
+                const spent = Number(item.used_amount);
+                
+                const percent = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+                const safePercent = percent > 100 ? 100 : percent; // Bar mentok di 100%
+                const barColor = getBarColor(percent);
 
-              const categoryIcons = {
-                "Makanan/Minuman": { icon: "🍔", color: "bg-blue-500" },
-                Pakaian: { icon: "👕", color: "bg-green-500" },
-                Bensin: { icon: "⛽", color: "bg-blue-400" },
-                Kesehatan: { icon: "🏥", color: "bg-red-400" },
-                Hiburan: { icon: "🎬", color: "bg-purple-400" },
-                "Lainnya": { icon: "💰", color: "bg-gray-400" },
-              };
+                // Cari icon, kalau tidak ada pakai default
+                const catStyle = Object.keys(categoryIcons).find(key => categoryName.includes(key)) 
+                                ? categoryIcons[Object.keys(categoryIcons).find(key => categoryName.includes(key))]
+                                : categoryIcons["Default"];
 
-              const category =
-                categoryIcons[item.name] || { icon: "💰", color: "bg-gray-400" };
-
-              return (
-                <div
-                  key={item.id}
-                  className="p-4 border border-gray-200 rounded-[20px] shadow-md hover:shadow-lg transition-shadow bg-white flex items-center gap-6"
-                >
+                return (
                   <div
-                    className={`w-16 h-16 flex items-center justify-center rounded-full text-white text-2xl ${category.color}`}
+                    key={budgetId}
+                    className="p-5 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all bg-white flex items-center gap-6 group relative"
                   >
-                    {category.icon}
-                  </div>
+                    {/* Icon Kategori */}
+                    <div className={`w-16 h-16 flex items-center justify-center rounded-full text-2xl shadow-inner ${catStyle.color} bg-opacity-90`}>
+                      {catStyle.icon}
+                    </div>
 
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-black">{item.name}</h2>
-
-                    <div className="flex items-center gap-4 mt-2">
-                      <div className="relative flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`${barColor} h-full rounded-full`}
-                          style={{ width: `${percent}%` }}
-                        ></div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <h2 className="text-xl font-bold text-gray-800">{categoryName}</h2>
+                        {/* Tombol Hapus (Muncul saat hover) */}
+                        <button 
+                            onClick={() => handleDelete(budgetId)}
+                            className="p-2 text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                            title="Hapus Budget"
+                        >
+                            <Trash2 size={18} />
+                        </button>
                       </div>
-                      <span className="text-black font-semibold">{percent}%</span>
+
+                      {/* Progress Bar Container */}
+                      <div className="flex items-center gap-4 mt-2">
+                        <div className="relative flex-1 h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className={`${barColor} h-full rounded-full transition-all duration-700 ease-out`}
+                            style={{ width: `${safePercent}%` }}
+                          ></div>
+                        </div>
+                        <span className={`font-bold min-w-[3rem] text-right ${percent > 100 ? 'text-red-600' : 'text-gray-600'}`}>
+                            {percent}%
+                        </span>
+                      </div>
+
+                      {/* Info Nominal */}
+                      <div className="flex justify-between mt-2 text-sm">
+                        <span className="text-gray-500">
+                            Terpakai: <span className={percent > 100 ? "text-red-600 font-bold" : "text-gray-800 font-medium"}>{formatRupiah(spent)}</span>
+                        </span>
+                        <span className="text-gray-500">
+                            Limit: <span className="text-gray-800 font-bold">{formatRupiah(limit)}</span>
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="text-black mt-1">
-                      Rp {item.spent.toLocaleString()} / Rp {item.limit.toLocaleString()}
-                    </div>
+                    {/* Tombol Edit */}
+                    <button
+                      className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition font-semibold border border-blue-100"
+                      onClick={() => setEditData({ id: budgetId, name: categoryName, limit: formatNumber(limit) })}
+                    >
+                      Edit
+                    </button>
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded-[10px] shadow hover:bg-blue-600 transition-colors duration-300 font-semibold"
-                    onClick={() => setEditData({ ...item, limit: formatNumber(item.limit) })}
-                  >
-                    Edit
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Tombol Tambah */}
-          <button
-            onClick={() => setShowAdd(true)}
-            className="absolute bottom-6 right-6 px-6 py-3 bg-blue-500 text-white rounded-[10px] shadow-lg hover:bg-blue-600 transition-colors duration-300 font-semibold select-none"
-          >
-            Tambah
-          </button>
         </div>
       </div>
 
       {/* --- MODAL EDIT --- */}
       {editData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 w-[25rem] rounded-xl">
-            {/* Judul Modal Edit: Hitam & Tengah */}
-            <h2 className="text-2xl font-bold mb-4 text-center text-black">Edit Budget</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white p-8 w-[28rem] rounded-2xl shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Budget</h2>
 
-            {/* Nama Kategori (Label teks hitam, input rounded-2xl) */}
-            <label className="block mb-2 text-black font-medium">Nama Kategori</label>
+            <label className="block mb-2 text-gray-600 font-medium text-sm">Kategori</label>
             <input
-              className="w-full p-3 border-2 border-gray-300 rounded-2xl mb-4 text-black cursor-not-allowed bg-gray-50"
+              className="w-full p-4 border border-gray-200 rounded-xl mb-5 text-gray-500 bg-gray-50 cursor-not-allowed font-medium"
               value={editData.name}
               disabled
               readOnly
             />
 
-            {/* Batas Bulanan (Label teks hitam, input rounded-2xl) */}
-            <label className="block mb-2 text-black font-medium">Batas Bulanan (Rp)</label>
-             {/* Input Group untuk Batas Bulanan di Modal Edit */}
-            <div className="mb-4">
-              <div className="flex items-center border-2 border-gray-300 rounded-2xl focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
-                <div className="bg-gray-100 text-black px-4 py-3 font-semibold border-r border-gray-300">
-                  Rp
-                </div>
+            <label className="block mb-2 text-gray-600 font-medium text-sm">Batas Bulanan (Rp)</label>
+            <div className="mb-8">
+              <div className="flex items-center border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 overflow-hidden bg-white transition">
+                <div className="bg-gray-50 text-gray-500 px-4 py-3 font-semibold border-r border-gray-200">Rp</div>
                 <input
                   type="text"
                   placeholder="0"
-                  className="w-full p-3 outline-none text-black" 
+                  className="w-full p-3 outline-none text-gray-800 font-bold text-lg" 
                   value={editData.limit}
                   onChange={(e) => {
                     const rawValue = e.target.value;
                     const numericValue = rawValue.replace(/[^0-9]/g, "");
                     const formattedValue = numericValue ? formatNumber(numericValue) : "";
-                    
                     setEditData({ ...editData, limit: formattedValue });
                   }}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex justify-end gap-3">
               <button
-                // Tombol Batal: text-blue-500 dan bg-gray-200
-                className="px-4 py-2 bg-gray-200 text-blue-500 rounded font-semibold transition-colors duration-300 hover:bg-gray-300"
+                className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition"
                 onClick={() => setEditData(null)}
               >
                 Batal
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-[10px] shadow hover:bg-blue-600 transition-colors duration-300 font-semibold"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition font-semibold flex items-center gap-2"
                 onClick={handleUpdate}
               >
-                Simpan
+                <Save size={18} /> Simpan
               </button>
             </div>
           </div>
@@ -226,79 +332,72 @@ export default function Budget() {
 
       {/* --- MODAL TAMBAH --- */}
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 w-[26rem] rounded-xl shadow-lg">
-            {/* Judul di tengah & hitam */}
-            <h2 className="text-2xl font-bold mb-6 text-center text-black">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white p-8 w-[28rem] rounded-2xl shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
               Tambah Budget Baru
             </h2>
 
-            {/* Dropdown Kategori (Label teks hitam, input rounded-2xl) */}
-            <div className="mb-4">
-              <label className="block text-black font-medium mb-1">Kategori</label>
-              <select
-                // Tambahkan kelas untuk membuat dropdown bisa di-scroll
-                className="w-full p-3 border-2 border-gray-300 rounded-2xl bg-white focus:border-blue-500 focus:outline-blue-500 appearance-none text-black max-h-40 overflow-y-auto"
-                value={newBudget.name}
-                onChange={(e) =>
-                  setNewBudget({ ...newBudget, name: e.target.value })
-                }
-              >
-                <option value="" disabled className="text-gray-500">-- Pilih Kategori --</option>
-                {/* Menggunakan transactionCategories (daftar lengkap) */}
-                {transactionCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+            {/* Dropdown Kategori */}
+            <div className="mb-5">
+              <label className="block text-gray-600 font-medium mb-2 text-sm">Kategori Pengeluaran</label>
+              <div className="relative">
+                <select
+                    className="w-full p-4 border border-gray-300 rounded-xl bg-white focus:border-blue-500 focus:outline-none appearance-none text-gray-800 font-medium cursor-pointer"
+                    value={newBudget.category_id}
+                    onChange={(e) => setNewBudget({ ...newBudget, category_id: e.target.value })}
+                >
+                    <option value="" disabled>-- Pilih Kategori --</option>
+                    {categories.map((cat) => (
+                    <option key={cat.category_id} value={cat.category_id}>
+                        {cat.name}
+                    </option>
+                    ))}
+                </select>
+                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                    ▼
+                </div>
+              </div>
             </div>
 
-            {/* Max Budget dengan Rp dan Formatting (Label teks hitam, input rounded-2xl) */}
-            <div className="mb-4">
-              <label className="block text-black font-medium mb-1">
-                Max Budget (Rp)
+            {/* Input Nominal */}
+            <div className="mb-8">
+              <label className="block text-gray-600 font-medium mb-2 text-sm">
+                Batas Maksimal (Rp)
               </label>
               
-              <div className="flex items-center border-2 border-gray-300 rounded-2xl focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden bg-white">
-                {/* Bagian Tulisan Rp (Statis) - teks hitam */}
-                <div className="bg-gray-100 text-black px-4 py-3 font-semibold border-r border-gray-300">
-                  Rp
-                </div>
-
-                {/* Input Angka */}
+              <div className="flex items-center border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 overflow-hidden bg-white transition">
+                <div className="bg-gray-50 text-gray-500 px-4 py-3 font-semibold border-r border-gray-200">Rp</div>
                 <input
                   type="text" 
                   placeholder="0"
-                  className="w-full p-3 outline-none text-black"
-                  value={newBudget.limit}
+                  className="w-full p-3 outline-none text-gray-800 font-bold text-lg"
+                  value={newBudget.amount}
                   onChange={(e) => {
                     const rawValue = e.target.value;
                     const numericValue = rawValue.replace(/[^0-9]/g, "");
                     const formattedValue = numericValue ? formatNumber(numericValue) : "";
-                    
-                    setNewBudget({ ...newBudget, limit: formattedValue });
+                    setNewBudget({ ...newBudget, amount: formattedValue });
                   }}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3">
               <button
-                // Tombol Batal: text-blue-500 dan bg-gray-200
-                className="px-4 py-2 bg-gray-200 text-blue-500 rounded-lg font-semibold transition-colors duration-300 hover:bg-gray-300"
+                className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition"
                 onClick={() => {
                   setShowAdd(false);
-                  setNewBudget({ name: "", limit: "" });
+                  setNewBudget({ category_id: "", amount: "", period_start: "", period_end: "" });
                 }}
               >
                 Batal
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 font-medium"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 font-semibold flex items-center gap-2"
                 onClick={handleAdd}
               >
-                Tambah
+                <Plus size={18} /> Tambah
               </button>
             </div>
           </div>
