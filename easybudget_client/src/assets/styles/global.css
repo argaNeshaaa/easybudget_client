@@ -32,5 +32,11 @@
 
 .dashboard-card {
     border-radius: 18px;
-    box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 8px 8px 20px rgba(40, 39, 39, 0.3);
+}
+
+.dashboard-card:hover {
+    box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.3);
+    transition: all;
+    transition-duration: 300ms;
 }

@@ -1,363 +1,357 @@
+import { useEffect, useState } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
+import AccountChart from "./AccountChart"; 
+import AddAccountModal from "./AddAccountModal";
+import EditAccountModal from "./EditAccountModal";
 import "../../assets/styles/global.css";
+import api from "../../api/axios";
+import { CreditCard, Wallet as WalletIcon, Banknote, ArrowRightLeft, Plus, Pencil } from "lucide-react"; // Tambahkan Pencil
+
+// Helper Format Rupiah
+const formatRupiah = (number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(number);
+};
 
 function Wallet() {
-    const wallets = [
-    {
-      name: "Credit Card",
-      percent: 52,
-      color: "bg-blue-500",
-      iconBg: "bg-blue-500",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M2 7a2 2 0 012-2h16a2 2 0 012 2v3H2V7zm20 5v5a2 2 0 01-2 2H4a2 2 0 01-2-2v-5h20zm-7 3H7v2h8v-2z"/>
-        </svg>
-      ),
-    },
-    {
-      name: "Cash",
-      percent: 21,
-      color: "bg-green-500",
-      iconBg: "bg-green-500",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M4 6h16v12H4V6zm8 4a2 2 0 100 4 2 2 0 000-4z"/>
-        </svg>
-      ),
-    },
-    {
-      name: "E Wallet",
-      percent: 74,
-      color: "bg-sky-500",
-      iconBg: "bg-sky-500",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9"></circle>
-          <rect x="8" y="10" width="8" height="4" rx="1" fill="#fff"></rect>
-        </svg>
-      ),
-    },
-  ];
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0); 
+  
+  // State Modal
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  const token = localStorage.getItem("token");
+
+  // ✅ 1. Fetch Data
+  const fetchAccounts = async () => {
+    try {
+      const res = await api.get("/accounts/summary/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAccounts(res.data.data);
+    } catch (err) {
+      console.error("Gagal load accounts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchAccounts();
+  }, [token]);
+
+  // ✅ 2. Callback Add (Sukses Tambah)
+  const handleAccountAdded = () => {
+    fetchAccounts(); 
+  };
+
+  // ✅ 3. Callback Edit (Sukses Edit) -- INI YANG HILANG SEBELUMNYA
+  const handleAccountChange = () => {
+    fetchAccounts(); 
+  };
+
+  // Fungsi Navigasi Slider
+  const nextCard = () => {
+    setCurrentIndex((prev) => (prev + 1) % accounts.length);
+  };
+
+  const prevCard = () => {
+    setCurrentIndex((prev) => (prev - 1 + accounts.length) % accounts.length);
+  };
+
+  const currentAccount = accounts[currentIndex];
+
+  const getCardStyle = (type) => {
+    const lowerType = type?.toLowerCase() || "";
+    if (lowerType.includes("bank")) return "from-blue-600 to-blue-400";
+    if (lowerType.includes("cash") || lowerType.includes("tunai")) return "from-green-600 to-green-400";
+    if (lowerType.includes("wallet") || lowerType.includes("dana") || lowerType.includes("gopay")) return "from-sky-600 to-sky-400";
+    return "from-gray-700 to-gray-500";
+  };
+
+  const totalGlobalBalance = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+  const totalGlobalIncome = accounts.reduce((sum, acc) => sum + Number(acc.total_income), 0);
+  const totalGlobalExpense = accounts.reduce((sum, acc) => sum + Number(acc.total_expense), 0);
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-gray-100">Loading Wallet...</div>;
+
   return (
     <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito">
       <Sidebar />
       <Header />
+      
+      {/* Modal Add */}
+      <AddAccountModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onSuccess={handleAccountAdded} 
+      />
+
+      {/* Modal Edit */}
+      <EditAccountModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        onSuccess={handleAccountChange} // Sekarang tidak error lagi
+        accountData={currentAccount} 
+      />
+
       <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-4 z-10">
-        <div className="h-[120vh] text-white flex items-center justify-start flex-col">
-            {/* 11 */}
-          <div className="w-full h-[35rem] flex flex-between items-center justify-between">
-            <div className="dashboard-card w-[50.7rem] h-[30rem] bg-[#ffffff] ml-[1rem]">
-              <div className="w-full h-full p-6 flex">
-  {/* LEFT: CREDIT CARD */}
-  <div className="w-1/2 pr-6">
-    {/* Title */}
-    <div className="flex items-center mb-4">
-      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-6 h-6 text-blue-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.25 8.25h19.5m-16.5 4.5h4.5m-4.5 3h3m-3-9h13.5a2.25 2.25 0 012.25 2.25v7.5a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 15.75v-7.5A2.25 2.25 0 014.5 6z" />
-        </svg>
-      </div>
-      <h2 className="text-2xl font-semibold ml-3">Credit Card</h2>
-    </div>
-
-    {/* Card */}
-    <div className="w-[20rem] h-[13rem] rounded-3xl bg-gradient-to-br from-blue-600 to-blue-400 text-white p-5 shadow-md">
-      <div className="flex justify-between items-start">
-        <h3 className="text-xl font-bold">BCA</h3>
-        <div className="text-right">
-          <p className="text-sm">Blue</p>
-          <p className="text-[0.6rem] tracking-wide">PREMIUM</p>
-        </div>
-      </div>
-
-      <div className="mt-6 text-lg tracking-widest">
-        5789 **** **** 2847
-      </div>
-
-      <div className="flex justify-between mt-5 text-sm">
-        <div>
-          <p className="opacity-80 text-xs">Valid Thru</p>
-          <p>06/21</p>
-        </div>
-        <div>
-          <p className="opacity-80 text-xs">Expired date</p>
-          <p>06/21</p>
-        </div>
-      </div>
-
-      <p className="mt-4 text-sm">Valentino</p>
-    </div>
-
-    {/* Slider navigation */}
-    <div className="flex items-center justify-center mt-4 space-x-2 text-gray-400">
-      <span className="text-sm">‹ Sebelumnya</span>
-      <div className="flex space-x-1 mx-4">
-        <div className="w-2 h-2 bg-green-500 rounded-full" />
-        <div className="w-2 h-2 bg-gray-300 rounded-full" />
-        <div className="w-2 h-2 bg-gray-300 rounded-full" />
-      </div>
-      <span className="text-sm">Selanjutnya ›</span>
-    </div>
-
-    {/* Limit progress */}
-    <div className="mt-5">
-      <div className="w-full h-2 bg-gray-200 rounded-full">
-        <div className="h-2 bg-blue-600 rounded-full w-[20%]" /> {/* progress */}
-      </div>
-
-      <div className="flex justify-between mt-2 text-sm text-gray-600">
-        <span>Limit Harian</span>
-        <span>Rp 100k / Rp 20Jt</span>
-      </div>
-    </div>
-  </div>
-
-  {/* RIGHT: BALANCE INFO */}
-  <div className="w-1/2 pl-6 border-l">
-    <div className="mb-6">
-      <p className="text-3xl font-bold">Rp 6.000.000</p>
-      <p className="text-gray-500 text-sm">Total Saldo Credit Card</p>
-
-      <p className="text-xl font-semibold text-blue-600 mt-3">Rp 300.000</p>
-      <p className="text-gray-500 text-sm">Saldo BCA</p>
-    </div>
-
-    <div className="w-full h-[1px] bg-gray-200 my-4"></div>
-
-    {/* Currency & Status */}
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <p className="text-sm text-gray-500">Currency</p>
-        <p className="font-medium">Rupiah / Indonesian Rupiah</p>
-      </div>
-
-      <div>
-        <p className="text-sm text-gray-500">Status</p>
-        <p className="font-medium">Active</p>
-      </div>
-    </div>
-  </div>
-</div>
-            </div>
-<div className=" w-[50.7rem] h-[30rem] flex flex-col">
-
-  {/* ================== TOP 4 BOX ================== */}
-  <div className="w-full h-[50%] mt-[10px]">
-    {/* Row 1 */}
-    <div className="w-full h-[50%] flex items-start justify-between">
-      
-      {/* Total Saldo Wallet */}
-      <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex">
-        <div className="w-2 bg-blue-500 rounded-l-xl"></div>
-        <div className="p-4">
-          <p className="text-gray-500 text-lg">Total Saldo Wallet</p>
-          <p className="text-2xl font-semibold text-[#0A1A2F] mt-2">Rp 11.000.000</p>
-        </div>
-      </div>
-
-      {/* Tabungan */}
-      <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex">
-        <div className="w-2 bg-yellow-400 rounded-l-xl"></div>
-        <div className="p-4">
-          <p className="text-gray-500 text-lg">Tabungan</p>
-          <p className="text-2xl font-semibold text-[#0A1A2F] mt-2">Rp 2.000.000</p>
-        </div>
-      </div>
-
-    </div>
-
-    {/* Row 2 */}
-    <div className="w-full h-[50%] flex items-center justify-between">
-      
-      {/* Pemasukan */}
-      <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex">
-        <div className="w-2 bg-green-500 rounded-l-xl"></div>
-        <div className="p-4">
-          <p className="text-gray-500 text-lg">Pemasukan</p>
-          <p className="text-2xl font-semibold text-[#0A1A2F] mt-2">Rp 15.000.000</p>
-        </div>
-      </div>
-
-      {/* Pengeluaran */}
-      <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex">
-        <div className="w-2 bg-red-500 rounded-l-xl"></div>
-        <div className="p-4">
-          <p className="text-gray-500 text-lg">Pengeluaran</p>
-          <p className="text-2xl font-semibold text-[#0A1A2F] mt-2">Rp 4.000.000</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  {/* ================== BOTTOM 2 BOX ================== */}
-  <div className="w-full h-[50%] flex items-end justify-between mb-[10px]">
-
-    {/* Cash */}
-    <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex p-5">
-      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mr-5">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-            d="M3 8l1.664 8.322A2 2 0 006.635 18H17.37a2 2 0 001.97-1.678L21 8M3 8h18M3 8l2-4h14l2 4" />
-        </svg>
-      </div>
-      <div>
-        <p className="text-xl font-semibold">Cash</p>
-        <p className="text-2xl font-bold text-[#0A1A2F]">Rp 2.000.000</p>
-        <p className="text-gray-400 text-sm">Total Saldo Cash</p>
-      </div>
-    </div>
-
-    {/* E Wallet */}
-    <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex p-5">
-      <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mr-5">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-            d="M3 7h18M3 12h18M3 17h18" />
-        </svg>
-      </div>
-      <div>
-        <p className="text-xl font-semibold">E Wallet</p>
-        <p className="text-2xl font-bold text-[#0A1A2F]">Rp 3.000.000</p>
-        <p className="text-gray-400 text-sm">Total Saldo E Wallet</p>
-      </div>
-    </div>
-
-  </div>
-</div>
-          </div>
-          {/* 2 */}
-          <div className="w-full h-[35rem] flex flex-between items-center justify-between">
-            <div className="dashboard-card w-[60rem] h-[30rem] bg-[#ffffff] ml-[1rem] p-6 rounded-lg shadow">
-  <div className="flex justify-between items-center">
-    <h1 className="text-2xl font-bold text-gray-800">Statistik</h1>
-    <div className="flex items-center gap-2 cursor-pointer">
-      <span className="text-gray-700 font-medium">Grafik Jan-Jun</span>
-      <svg className="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.082l3.71-3.85a.75.75 0 111.08 1.04l-4.25 4.4a.75.75 0 01-1.08 0l-4.25-4.4a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-      </svg>
-    </div>
-  </div>
-
-  <div className="flex justify-end mt-2 gap-6 mr-3">
-    <div className="flex items-center gap-2">
-      <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
-      <span className="text-gray-700">Pendapatan</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <div className="w-4 h-4 bg-red-500 rounded-sm"></div>
-      <span className="text-gray-700">Pengeluaran</span>
-    </div>
-  </div>
-
-  <div className="w-full h-[20rem] flex items-end gap-8 pb-4 pl-4">
-    
-    <div className="flex flex-col justify-between h-full text-gray-400 text-sm pt-1">
-      <span>10Jt</span>
-      <span>8Jt</span>
-      <span>6Jt</span>
-      <span>4Jt</span>
-      <span>2Jt</span>
-      <span>0</span>
-    </div>
-
-    <div class="flex justify-around items-end w-full">
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[6rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[9.5rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Jan</span>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[4.5rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[5rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Feb</span>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[6rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[3.5rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Mar</span>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[6rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[6.5rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Apr</span>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[5rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[6.5rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Mei</span>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="flex gap-2 items-end">
-          <div class="w-6 bg-red-500 h-[3rem] rounded"></div>
-          <div class="w-6 bg-green-500 h-[9rem] rounded"></div>
-        </div>
-        <span class="mt-2 text-gray-700">Jun</span>
-      </div>
-
-    </div>
-  </div>
-</div>
-            <div className="dashboard-card w-[40rem] h-[30rem] bg-[#ffffff] mr-[1rem] p-6 rounded-lg shadow">
-
-      {/* Title */}
-      <h1 className="text-2xl font-bold text-gray-800 mb-8">
-        Statistik Pengeluaran Setiap Wallet
-      </h1>
-
-      {/* List */}
-      <div className="flex flex-col gap-10">
-
-        {wallets.map((w, i) => (
-          <div key={i} className="flex items-center gap-4">
-
-            {/* Icon */}
-            <div className={`w-12 h-12 ${w.iconBg} rounded-full flex items-center justify-center`}>
-              {w.icon}
-            </div>
-
-            {/* Progress Area */}
-            <div className="flex-1">
-              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-3 ${w.color} rounded-full transition-all duration-700 ease-out`}
-                  style={{ width: `${w.percent}%` }}
-                ></div>
+        <div className="h-auto text-white flex items-center justify-start flex-col">
+          
+          <div className="w-full h-max flex flex-between items-center justify-between mt-[1rem] mb-[1rem]">
+            <div className="dashboard-card w-[50.7rem] h-[30rem] bg-[#ffffff] ml-[1rem] rounded-xl shadow-md relative">
+              
+              {/* Tombol Tambah */}
+              <div className="absolute top-6 right-6 z-20">
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+                >
+                  <Plus size={18} />
+                  Tambah Akun
+                </button>
               </div>
-              <span className="text-gray-500 mt-1 block">{w.name}</span>
+
+              {accounts.length > 0 ? (
+                <div className="w-full h-full p-6 flex">
+                  
+                  {/* LEFT: SLIDER */}
+                  <div className="w-1/2 pr-6 flex flex-col justify-center">
+                    
+                    <div className="flex items-center mb-6">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <CreditCard className="text-blue-600 w-6 h-6" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-gray-800 ml-3 capitalize">
+                        {currentAccount?.account_type || "Account"}
+                      </h2>
+                    </div>
+
+                    {/* KARTU */}
+                    <div className={`w-full max-w-[22rem] h-[14rem] rounded-3xl bg-gradient-to-br ${getCardStyle(currentAccount?.account_type)} text-white p-6 shadow-xl transform transition-all duration-500 hover:scale-105 mx-auto relative group`}>
+                      
+                      {/* 🔥 TOMBOL EDIT (Hanya muncul saat hover) */}
+                      <button 
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/40 rounded-full backdrop-blur-sm transition opacity-0 group-hover:opacity-100"
+                        title="Edit Akun Ini"
+                      >
+                        <Pencil size={16} className="text-white" />
+                      </button>
+
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-2xl font-bold tracking-wide">{currentAccount?.account_name}</h3>
+                        <div className="text-right">
+                          <p className="text-sm opacity-80 uppercase">{currentAccount?.wallet_category}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 text-xl tracking-widest font-mono">
+                        {currentAccount?.account_number 
+                          ? currentAccount.account_number.replace(/(\d{4})/g, '$1 ').trim() 
+                          : "**** **** ****"}
+                      </div>
+
+                      <div className="flex justify-between mt-8 text-sm">
+                        <div>
+                          <p className="opacity-70 text-xs uppercase">Balance</p>
+                          <p className="font-semibold text-lg">{formatRupiah(currentAccount?.balance)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="opacity-70 text-xs uppercase">ID</p>
+                          <p>#{currentAccount?.account_id}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigasi */}
+                    <div className="flex items-center justify-center mt-8 space-x-6 text-gray-500">
+                      <button onClick={prevCard} className="hover:text-blue-600 transition font-medium text-sm">
+                        ‹ Sebelumnya
+                      </button>
+                      <div className="flex space-x-2">
+                        {accounts.map((_, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-blue-600 w-4' : 'bg-gray-300'}`} 
+                          />
+                        ))}
+                      </div>
+                      <button onClick={nextCard} className="hover:text-blue-600 transition font-medium text-sm">
+                        Selanjutnya ›
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: STATS */}
+                  <div className="w-1/2 pl-6 border-l border-gray-100 flex flex-col justify-center">
+                    <div className="mb-8">
+                      <p className="text-gray-400 text-sm font-medium uppercase tracking-wide">Saldo Saat Ini</p>
+                      <p className="text-4xl font-bold text-gray-800 mt-1">{formatRupiah(currentAccount?.balance)}</p>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-1.5 bg-green-200 rounded-full">
+                             <ArrowRightLeft size={14} className="text-green-700" />
+                          </div>
+                          <p className="text-gray-500 text-sm font-medium">Total Pemasukan (Akun Ini)</p>
+                        </div>
+                        <p className="text-xl font-bold text-green-600 ml-9">{formatRupiah(currentAccount?.total_income)}</p>
+                      </div>
+
+                      <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-1.5 bg-red-200 rounded-full">
+                             <ArrowRightLeft size={14} className="text-red-700" />
+                          </div>
+                          <p className="text-gray-500 text-sm font-medium">Total Pengeluaran (Akun Ini)</p>
+                        </div>
+                        <p className="text-xl font-bold text-red-600 ml-9">{formatRupiah(currentAccount?.total_expense)}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-400">Account Type</p>
+                        <p className="font-medium text-gray-700 capitalize">{currentAccount?.account_type}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Status</p>
+                        <p className="font-medium text-green-600 flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span> Active
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400 flex-col gap-4">
+                  <p>Belum ada akun yang terdaftar.</p>
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+                  >
+                    <Plus size={20} />
+                    Buat Akun Pertama
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Percentage */}
-            <span className="text-xl font-semibold text-gray-700">{w.percent}%</span>
+            {/* BOX KANAN ATAS */}
+            <div className="w-[50.7rem] h-[30rem] flex flex-col">
+              <div className="w-full h-[50%] mt-[10px]">
+                <div className="w-full h-[50%] flex items-start justify-between">
+                  <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex items-center hover:shadow-lg transition">
+                    <div className="w-2 h-full bg-blue-500 rounded-l-xl"></div>
+                    <div className="p-5 w-full">
+                      <div className="flex justify-between items-start">
+                         <div>
+                            <p className="text-gray-500 text-sm font-medium">Total Aset (Semua Akun)</p>
+                            <p className="text-2xl font-bold text-gray-800 mt-1">{formatRupiah(totalGlobalBalance)}</p>
+                         </div>
+                         <div className="p-2 bg-blue-100 rounded-lg"><WalletIcon className="text-blue-600" size={24}/></div>
+                      </div>
+                    </div>
+                  </div>
 
-          </div>
-        ))}
+                  <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex items-center hover:shadow-lg transition">
+                    <div className="w-2 h-full bg-yellow-400 rounded-l-xl"></div>
+                    <div className="p-5 w-full">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-gray-500 text-sm font-medium">Jumlah Akun</p>
+                            <p className="text-2xl font-bold text-gray-800 mt-1">{accounts.length} Akun</p>
+                          </div>
+                          <div className="p-2 bg-yellow-100 rounded-lg"><CreditCard className="text-yellow-600" size={24}/></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-      </div>
-    </div>
+                <div className="w-full h-[50%] flex items-center justify-between">
+                  <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex items-center hover:shadow-lg transition">
+                    <div className="w-2 h-full bg-green-500 rounded-l-xl"></div>
+                    <div className="p-5 w-full">
+                      <div className="flex justify-between items-start">
+                         <div>
+                            <p className="text-gray-500 text-sm font-medium">Total Pemasukan</p>
+                            <p className="text-xl font-bold text-gray-800 mt-1">{formatRupiah(totalGlobalIncome)}</p>
+                         </div>
+                         <div className="p-2 bg-green-100 rounded-lg"><ArrowRightLeft className="text-green-600" size={20}/></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex items-center hover:shadow-lg transition">
+                    <div className="w-2 h-full bg-red-500 rounded-l-xl"></div>
+                    <div className="p-5 w-full">
+                      <div className="flex justify-between items-start">
+                         <div>
+                            <p className="text-gray-500 text-sm font-medium">Total Pengeluaran</p>
+                            <p className="text-xl font-bold text-gray-800 mt-1">{formatRupiah(totalGlobalExpense)}</p>
+                         </div>
+                         <div className="p-2 bg-red-100 rounded-lg"><ArrowRightLeft className="text-red-600" size={20}/></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full h-[50%] flex items-end justify-between mb-[10px]">
+                <div className="dashboard-card w-[45%] h-[90%] ml-[1rem] bg-white rounded-xl shadow flex p-5 items-center">
+                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                    <Banknote className="text-green-600" size={28} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-gray-800">Cash / Tunai</p>
+                    <p className="text-xl font-bold text-green-600">
+                      {formatRupiah(accounts.filter(a => a.account_type.toLowerCase() === 'cash' || a.account_type.toLowerCase() === 'tunai').reduce((sum, a) => sum + Number(a.balance), 0))}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="dashboard-card w-[45%] h-[90%] mr-[1rem] bg-white rounded-xl shadow flex p-5 items-center">
+                  <div className="w-14 h-14 bg-sky-100 rounded-full flex items-center justify-center mr-4">
+                    <WalletIcon className="text-sky-600" size={28} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-gray-800">Bank & E-Wallet</p>
+                    <p className="text-xl font-bold text-sky-600">
+                      {formatRupiah(accounts.filter(a => a.account_type.toLowerCase() !== 'cash' && a.account_type.toLowerCase() !== 'tunai').reduce((sum, a) => sum + Number(a.balance), 0))}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+          
+          {/* SECTION 2: CHARTS */}
+          <div className="w-full h-max flex flex-between items-center justify-between mt-[1rem] mb-[1rem]">
+             <div className="dashboard-card w-full bg-white ml-[1rem] mr-[1rem] p-6 rounded-xl shadow-md flex flex-col">
+                <div className="flex justify-between items-center mb-4 px-2">
+                   <div>
+                      <h2 className="text-xl font-bold text-gray-800">Analisis Transaksi Bulan Ini</h2>
+                      <p className="text-sm text-gray-500">
+                         Menampilkan tren harian untuk akun: 
+                         <span className="font-bold text-blue-600 ml-1">
+                            {currentAccount?.account_name || "Loading..."}
+                         </span>
+                      </p>
+                   </div>
+                </div>
+
+                <AccountChart accountId={currentAccount?.account_id} />
+             </div>
+          </div>
+
         </div>
       </div>
     </div>

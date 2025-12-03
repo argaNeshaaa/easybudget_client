@@ -192,7 +192,7 @@ export default function Profile() {
             </div>
             <button
   onClick={() => navigate("/dashboard")}
-  className="mt-6 w-full px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-black transition"
+  className=" cursor-pointer mt-6 w-full px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-black transition"
 >
   ← Back to Dashboard
 </button>

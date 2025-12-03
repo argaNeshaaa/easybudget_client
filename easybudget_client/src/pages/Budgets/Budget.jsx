@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
 
 export default function Budget() {
-  // Daftar kategori dari page Transaksi, "Lainnya" Dihapus
   const transactionCategories = [
     "Makanan/Minuman",
     "Pakaian",
@@ -21,14 +20,13 @@ export default function Budget() {
   const [editData, setEditData] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
 
-  // Ubah limit jadi string "" agar input kosong di awal (tidak ada angka 0)
+  
   const [newBudget, setNewBudget] = useState({
     name: "",
     limit: "", 
   });
 
-  // Logika ini TIDAK DIGUNAKAN LAGI di dropdown modal Tambah, tetapi tetap ada
-  // untuk berjaga-jaga jika ingin digunakan untuk validasi atau UI lain.
+  
   const usedCategories = budgets.map((b) => b.name);
   const availableCategories = transactionCategories.filter(
     (cat) => !usedCategories.includes(cat)
@@ -49,14 +47,11 @@ export default function Budget() {
     return "bg-red-500";
   };
 
-  // Helper untuk format angka ke Rupiah dengan titik (Visual saja)
   const formatNumber = (num) => {
-    // Memastikan num adalah string angka murni sebelum format
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const handleUpdate = () => {
-    // Hapus titik sebelum dikonversi ke number saat update
     const cleanLimit = Number(editData.limit.toString().replace(/\./g, "")); 
 
     if (!editData.name || !cleanLimit || cleanLimit <= 0) return;
@@ -68,12 +63,10 @@ export default function Budget() {
   };
 
   const handleAdd = () => {
-    // Hapus titik sebelum disimpan ke database agar jadi number murni
     const cleanLimit = Number(newBudget.limit.replace(/\./g, ""));
 
     if (!newBudget.name || !cleanLimit || cleanLimit <= 0) return;
 
-    // Tambahkan validasi sederhana agar tidak ada kategori ganda
     if (usedCategories.includes(newBudget.name)) {
         alert(`Kategori "${newBudget.name}" sudah memiliki budget.`);
         return;
