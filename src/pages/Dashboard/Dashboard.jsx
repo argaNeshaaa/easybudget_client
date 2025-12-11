@@ -9,6 +9,7 @@ import useAuth from "../../hooks/useAuth"; // Optional: Jika butuh user ID, tapi
 import "../../assets/styles/global.css";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function Dashboard() {
   const [showModal, setShowModal] = useState(false);
