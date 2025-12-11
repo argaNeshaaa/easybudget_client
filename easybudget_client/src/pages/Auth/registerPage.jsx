@@ -1,6 +1,7 @@
 import PasswordInput from "../../components/ui/PasswordInput";
 import { useState } from "react";
-import api from "../../api/axios"; // ← pastikan path benar
+import api from "../../api/axios";
+import Swal from "sweetalert2";
 
 function RegisterPage({ onSwitch }) {
   const [name, setName] = useState("");
@@ -37,9 +38,17 @@ function RegisterPage({ onSwitch }) {
         localStorage.setItem("token", res.data.token);
       }
 
-      alert("Registrasi berhasil! Silakan login.");
-      onSwitch();
-
+      Swal.fire({
+        title: "Berhasil!",
+        text: "Registrasi berhasil! Silakan login.",
+        icon: "success",
+        confirmButtonText: "Lanjut Login",
+        confirmButtonColor: "#7B61FF", // Sesuaikan dengan warna tema aplikasi Anda
+      }).then((result) => {
+        if (result.isConfirmed) {
+          onSwitch(); // Pindah ke halaman login setelah user klik OK
+        }
+      });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Terjadi kesalahan.");
@@ -49,7 +58,6 @@ function RegisterPage({ onSwitch }) {
   return (
     <>
       <div className="register-box font-gabarito w-[28rem] h-[50rem] bg-[#ffffff] rounded-[3rem] mr-[3rem] flex flex-col items-center">
-        
         <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[2.5rem]">
           Buat Akun
         </h1>
@@ -62,9 +70,7 @@ function RegisterPage({ onSwitch }) {
 
         {/* Nama */}
         <div className="w-[88%] pt-[2rem] flex flex-col">
-          <label className="block text-gray-700 font-medium mb-1">
-            Nama
-          </label>
+          <label className="block text-gray-700 font-medium mb-1">Nama</label>
           <input
             type="text"
             placeholder="Masukan Nama"
@@ -76,9 +82,7 @@ function RegisterPage({ onSwitch }) {
 
         {/* Email */}
         <div className="w-[88%] flex flex-col">
-          <label className="block text-gray-700 font-medium mb-1">
-            Email
-          </label>
+          <label className="block text-gray-700 font-medium mb-1">Email</label>
           <input
             type="email"
             placeholder="Masukkan Email"
@@ -130,7 +134,8 @@ function RegisterPage({ onSwitch }) {
 
         {/* Button Register */}
         <div className="w-[88%] pt-[5rem]">
-          <button type="submit"
+          <button
+            type="submit"
             onClick={handleRegister}
             className="w-full bg-gradient-to-r from-[#7B61FF] to-[#6E4CFF] text-white cursor-pointer py-2 rounded-xl font-semibold hover:opacity-90 transition-all"
           >

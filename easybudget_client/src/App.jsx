@@ -3,18 +3,19 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Hero from "./pages/Hero/Hero";
 import IndexAuth from "./pages/Auth/indexAuth";
-import Dashboard from "./pages/Dashboard/Dashboard"
-import Wallet from "./pages/Wallet/Wallet"
-import Transaction from "./pages/Transactions/Transaction"
-import Budget from "./pages/Budgets/Budget"
-import Goal from "./pages/Goal/Goal"
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Wallet from "./pages/Wallet/Wallet";
+import Transaction from "./pages/Transactions/Transaction";
+import Budget from "./pages/Budgets/Budget";
+import Goal from "./pages/Goal/Goal";
 import Report from "./pages/Reports/Report";
 import Profile from "./pages/Profile/Profile";
+import AskAI from "./pages/ai/AskAI";
 import { PageTransition } from "./components/ui/PageTransition";
 import OverlayBackground from "./components/ui/OverlayBackground";
 import { useRef, useMemo } from "react";
 import GoogleAuthSuccess from "./routes/AuthSuccess";
-
+import { Toaster } from "react-hot-toast";
 function App() {
   const location = useLocation();
   const prevPath = useRef(location.pathname);
@@ -37,6 +38,7 @@ function App() {
 
   return (
     <div className="overflow-hidden w-screen h-screen relative">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* background / particle tetap di belakang */}
       {showOverlay && <OverlayBackground />}
 
@@ -60,63 +62,24 @@ function App() {
                 </PageTransition>
               }
             />
-            <Route 
-            path="/dashboard"
-            element={
-              <PageTransition forward={forward}>
-                <Dashboard />
-              </PageTransition>
-            }
-             />
-            <Route 
-            path="/wallet"
-            element={
-              <PageTransition forward={forward}>
-                <Wallet />
-              </PageTransition>
-            }
-             />
-            <Route 
-            path="/transaction"
-            element={
-              <PageTransition forward={forward}>
-                <Transaction />
-              </PageTransition>
-            }
-             />
-            <Route 
-            path="/budget"
-            element={
-              <PageTransition forward={forward}>
-                <Budget />
-              </PageTransition>
-            }
-             />
-            <Route 
-            path="/goal"
-            element={
-              <PageTransition forward={forward}>
-                <Goal />
-              </PageTransition>
-            }
-             />
-            <Route 
-            path="/report"
-            element={
-              <PageTransition forward={forward}>
-                <Report />
-              </PageTransition>
-            }
-             />
-             <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
-                         <Route 
-            path="/profile"
-            element={
-              <PageTransition forward={forward}>
-                <Profile />
-              </PageTransition>
-            }
-             />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/transaction" element={<Transaction />} />
+            <Route path="/budget" element={<Budget />} />
+            <Route path="/goal" element={<Goal />} />
+            <Route path="/report" element={<Report />} />
+
+            <Route path="/ai" element={<AskAI />} />
+            <Route
+              path="/auth/google/success"
+              element={<GoogleAuthSuccess />}
+            />
+            <Route
+              path="/profile"
+              element={
+                  <Profile />
+              }
+            />
           </Routes>
         </AnimatePresence>
       </div>

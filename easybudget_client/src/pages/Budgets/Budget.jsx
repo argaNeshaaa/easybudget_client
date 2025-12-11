@@ -1,24 +1,20 @@
 import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
-import { Plus, Edit2, Trash2, X, Save, Loader2 } from "lucide-react";
+import AddBudgetModal from "./AddBudgetModal";
+import BudgetCard from "./BudgetCard";
+import { Plus, Edit2, Trash2, X, Save, Loader2, Clock, Calendar, CheckCircle, AlertCircle, Wallet, PieChart, TrendingUp  } from "lucide-react";
 import api from "../../api/axios";
 import "../../assets/styles/global.css";
-
+import Swal from "sweetalert2";
 export default function Budget() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState([]); // Untuk dropdown saat tambah budget
   
-  // State Modal Tambah
-  const [showAdd, setShowAdd] = useState(false);
-  const [newBudget, setNewBudget] = useState({
-    category_id: "",
-    amount: "",
-    period_start: "",
-    period_end: ""
-  });
+  // State Filter Status (active, upcoming, expired)
+  const [filterStatus, setFilterStatus] = useState("active");
 
-  // State Modal Edit
+  // State Modal
+  const [showAdd, setShowAdd] = useState(false);
   const [editData, setEditData] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -33,16 +29,13 @@ export default function Budget() {
     } catch (e) { return null; }
   };
 
-  const formatRupiah = (num) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(num);
-  };
+  const formatRupiah = (num) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(num);
+  const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  // Format Tanggal (dd MMM yyyy)
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const getBarColor = (percent) => {
@@ -59,7 +52,6 @@ export default function Budget() {
     "Hiburan": { icon: "🎬", color: "bg-purple-500" },
     "Transportasi": { icon: "🚗", color: "bg-indigo-500" },
     "Belanja": { icon: "🛍️", color: "bg-pink-500" },
-    // Default fallback
     "Default": { icon: "💰", color: "bg-gray-400" }
   };
 
@@ -70,15 +62,13 @@ export default function Budget() {
 
     try {
       setLoading(true);
-      // Panggil 2 API: Get Budgets & Get Categories (untuk dropdown)
-      const [resBudgets, resCategories] = await Promise.all([
-        api.get(`/budgets/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        api.get(`/categories/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
-      ]);
+      // Panggil API dengan parameter status
+      const res = await api.get(`/budgets/users/${userId}`, { 
+          headers: { Authorization: `Bearer ${token}` },
+          params: { status: filterStatus } 
+      });
 
-      setBudgets(resBudgets.data.data);
-      // Filter kategori hanya tipe 'expense'
-      setCategories(resCategories.data.data.filter(c => c.type === 'expense'));
+      setBudgets(res.data.data);
     } catch (err) {
       console.error("Gagal load data:", err);
     } finally {
@@ -86,73 +76,70 @@ export default function Budget() {
     }
   };
 
+  // Fetch ulang saat filter berubah
   useEffect(() => {
     if (token) fetchBudgets();
-  }, [token]);
+  }, [token, filterStatus]);
 
   // --- HANDLERS ---
-  const handleAdd = async () => {
-    if (!newBudget.category_id || !newBudget.amount) {
-        alert("Mohon lengkapi data");
-        return;
-    }
-
-    try {
-        // Set default tanggal bulan ini jika kosong
-        const date = new Date();
-        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
-
-        const payload = {
-            category_id: newBudget.category_id,
-            amount: newBudget.amount.replace(/\./g, ""), // Hapus titik format
-            period_start: newBudget.period_start || firstDay,
-            period_end: newBudget.period_end || lastDay
-        };
-
-        await api.post("/budgets", payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        fetchBudgets();
-        setShowAdd(false);
-        setNewBudget({ category_id: "", amount: "", period_start: "", period_end: "" });
-    } catch (err) {
-        alert(err.response?.data?.message || "Gagal menambah budget");
-    }
-  };
-
   const handleUpdate = async () => {
     try {
         const cleanAmount = editData.limit.toString().replace(/\./g, "");
-        
-        await api.patch(`/budgets/${editData.id}`, {
-            amount: cleanAmount
-        }, {
+        await api.patch(`/budgets/${editData.id}`, { amount: cleanAmount }, {
             headers: { Authorization: `Bearer ${token}` }
         });
-
+        toast.success("Update Budget Berhasil!");
         fetchBudgets();
         setEditData(null);
     } catch (err) {
-        alert("Gagal update budget");
+      toast.error("Gagal update budget");
     }
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("Yakin ingin menghapus budget ini?")) {
-        try {
-            await api.delete(`/budgets/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchBudgets();
-        } catch (err) {
-            alert("Gagal menghapus budget");
+const handleDelete = (id) => {
+    Swal.fire({
+        title: "Hapus Budget?",
+        text: "Anda yakin ingin menghapus budget ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33", // Merah untuk tombol hapus
+        cancelButtonColor: "#3085d6", // Biru untuk batal
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal"
+    }).then(async (result) => {
+        // Logika hanya jalan jika user klik tombol "Ya, Hapus!"
+        if (result.isConfirmed) {
+            try {
+                // Panggil API Delete
+                await api.delete(`/budgets/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                // Tampilkan pesan sukses singkat
+                Swal.fire({
+                    title: "Terhapus!",
+                    text: "Budget berhasil dihapus.",
+                    icon: "success",
+                    timer: 1500, // Hilang sendiri dalam 1.5 detik
+                    showConfirmButton: false
+                });
+
+                // Refresh data list budget
+                fetchBudgets();
+
+            } catch (err) {
+                console.error(err);
+                // Tampilkan pesan error jika gagal
+                Swal.fire({
+                    title: "Gagal!",
+                    text: err.response?.data?.message || "Gagal menghapus budget.",
+                    icon: "error"
+                });
+            }
         }
-    }
-  };
+    });
+};
 
-  // Setup tanggal header
   const monthNames = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember",
@@ -166,133 +153,27 @@ export default function Budget() {
       <Sidebar />
       <Header />
 
-      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] p-8 overflow-y-auto rounded-lg">
-        <div className="relative bg-white w-full p-8 rounded-2xl shadow-lg min-h-[80vh]">
+      {/* --- MODAL TAMBAH (Komponen Terpisah) --- */}
+      <AddBudgetModal 
+        isOpen={showAdd} 
+        onClose={() => setShowAdd(false)} 
+        onSuccess={fetchBudgets} 
+      />
 
-          {/* Header Section */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Budget Planning</h1>
-              <p className="text-gray-500 text-lg mt-1">
-                Periode {currentMonth} {currentYear}
-              </p>
-            </div>
-            
-            {/* Tombol Tambah */}
-            <button
-              onClick={() => setShowAdd(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all font-semibold"
-            >
-              <Plus size={20} />
-              Tambah Budget
-            </button>
-          </div>
-
-          {/* List Budget */}
-          {loading ? (
-            <div className="text-center py-20 text-gray-400">Loading budgets...</div>
-          ) : budgets.length === 0 ? (
-            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 text-lg">Belum ada budget bulan ini.</p>
-                <button onClick={() => setShowAdd(true)} className="text-blue-600 font-semibold mt-2 hover:underline">
-                    Buat sekarang
-                </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 pb-24">
-              {budgets.map((item) => {
-                // Mapping data dari backend ke variable frontend
-                const budgetId = item.budget_id;
-                const categoryName = item.category_name;
-                const limit = Number(item.limit_amount);
-                const spent = Number(item.used_amount);
-                
-                const percent = limit > 0 ? Math.round((spent / limit) * 100) : 0;
-                const safePercent = percent > 100 ? 100 : percent; // Bar mentok di 100%
-                const barColor = getBarColor(percent);
-
-                // Cari icon, kalau tidak ada pakai default
-                const catStyle = Object.keys(categoryIcons).find(key => categoryName.includes(key)) 
-                                ? categoryIcons[Object.keys(categoryIcons).find(key => categoryName.includes(key))]
-                                : categoryIcons["Default"];
-
-                return (
-                  <div
-                    key={budgetId}
-                    className="p-5 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all bg-white flex items-center gap-6 group relative"
-                  >
-                    {/* Icon Kategori */}
-                    <div className={`w-16 h-16 flex items-center justify-center rounded-full text-2xl shadow-inner ${catStyle.color} bg-opacity-90`}>
-                      {catStyle.icon}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <h2 className="text-xl font-bold text-gray-800">{categoryName}</h2>
-                        {/* Tombol Hapus (Muncul saat hover) */}
-                        <button 
-                            onClick={() => handleDelete(budgetId)}
-                            className="p-2 text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
-                            title="Hapus Budget"
-                        >
-                            <Trash2 size={18} />
-                        </button>
-                      </div>
-
-                      {/* Progress Bar Container */}
-                      <div className="flex items-center gap-4 mt-2">
-                        <div className="relative flex-1 h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                          <div
-                            className={`${barColor} h-full rounded-full transition-all duration-700 ease-out`}
-                            style={{ width: `${safePercent}%` }}
-                          ></div>
-                        </div>
-                        <span className={`font-bold min-w-[3rem] text-right ${percent > 100 ? 'text-red-600' : 'text-gray-600'}`}>
-                            {percent}%
-                        </span>
-                      </div>
-
-                      {/* Info Nominal */}
-                      <div className="flex justify-between mt-2 text-sm">
-                        <span className="text-gray-500">
-                            Terpakai: <span className={percent > 100 ? "text-red-600 font-bold" : "text-gray-800 font-medium"}>{formatRupiah(spent)}</span>
-                        </span>
-                        <span className="text-gray-500">
-                            Limit: <span className="text-gray-800 font-bold">{formatRupiah(limit)}</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Tombol Edit */}
-                    <button
-                      className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition font-semibold border border-blue-100"
-                      onClick={() => setEditData({ id: budgetId, name: categoryName, limit: formatNumber(limit) })}
-                    >
-                      Edit
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-        </div>
-      </div>
-
-      {/* --- MODAL EDIT --- */}
+      {/* --- MODAL EDIT (Inline) --- */}
       {editData && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
           <div className="bg-white p-8 w-[28rem] rounded-2xl shadow-2xl">
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Budget</h2>
-
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Edit Budget</h2>
+                <button onClick={() => setEditData(null)}><X size={20} className="text-gray-400 hover:text-gray-600"/></button>
+            </div>
             <label className="block mb-2 text-gray-600 font-medium text-sm">Kategori</label>
             <input
               className="w-full p-4 border border-gray-200 rounded-xl mb-5 text-gray-500 bg-gray-50 cursor-not-allowed font-medium"
               value={editData.name}
-              disabled
-              readOnly
+              disabled readOnly
             />
-
             <label className="block mb-2 text-gray-600 font-medium text-sm">Batas Bulanan (Rp)</label>
             <div className="mb-8">
               <div className="flex items-center border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 overflow-hidden bg-white transition">
@@ -311,98 +192,164 @@ export default function Budget() {
                 />
               </div>
             </div>
-
             <div className="flex justify-end gap-3">
-              <button
-                className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition"
-                onClick={() => setEditData(null)}
-              >
-                Batal
-              </button>
-              <button
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition font-semibold flex items-center gap-2"
-                onClick={handleUpdate}
-              >
-                <Save size={18} /> Simpan
-              </button>
+              <button className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition" onClick={() => setEditData(null)}>Batal</button>
+              <button className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2" onClick={handleUpdate}><Save size={18} /> Simpan</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- MODAL TAMBAH --- */}
-      {showAdd && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-          <div className="bg-white p-8 w-[28rem] rounded-2xl shadow-2xl">
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-              Tambah Budget Baru
-            </h2>
+      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] p-8 overflow-y-auto rounded-lg">
+        <div className="relative bg-white w-full p-8 rounded-2xl shadow-lg min-h-[80vh]">
 
-            {/* Dropdown Kategori */}
-            <div className="mb-5">
-              <label className="block text-gray-600 font-medium mb-2 text-sm">Kategori Pengeluaran</label>
-              <div className="relative">
-                <select
-                    className="w-full p-4 border border-gray-300 rounded-xl bg-white focus:border-blue-500 focus:outline-none appearance-none text-gray-800 font-medium cursor-pointer"
-                    value={newBudget.category_id}
-                    onChange={(e) => setNewBudget({ ...newBudget, category_id: e.target.value })}
+          {/* Header Section */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Budget Planning</h1>
+              <p className="text-gray-500 text-lg mt-1">
+                Kelola target pengeluaranmu agar tetap hemat.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAdd(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all font-semibold"
+            >
+              <Plus size={20} />
+              Tambah Budget
+            </button>
+          </div>
+
+          {/* FILTER TABS */}
+          <div className="flex gap-2 mb-8 border-b border-gray-200 overflow-x-auto">
+            {[
+                { key: 'active', label: 'Sedang Berjalan', icon: <Clock size={16}/> },
+                { key: 'upcoming', label: 'Akan Datang', icon: <Calendar size={16}/> },
+                { key: 'expired', label: 'Selesai / Lewat', icon: <CheckCircle size={16}/> }
+            ].map(tab => (
+                <button 
+                    key={tab.key}
+                    onClick={() => setFilterStatus(tab.key)}
+                    className={`flex items-center gap-2 px-4 py-2 font-medium text-sm rounded-t-lg transition-all whitespace-nowrap ${
+                        filterStatus === tab.key 
+                        ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" 
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
                 >
-                    <option value="" disabled>-- Pilih Kategori --</option>
-                    {categories.map((cat) => (
-                    <option key={cat.category_id} value={cat.category_id}>
-                        {cat.name}
-                    </option>
-                    ))}
-                </select>
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                    ▼
-                </div>
-              </div>
-            </div>
-
-            {/* Input Nominal */}
-            <div className="mb-8">
-              <label className="block text-gray-600 font-medium mb-2 text-sm">
-                Batas Maksimal (Rp)
-              </label>
-              
-              <div className="flex items-center border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 overflow-hidden bg-white transition">
-                <div className="bg-gray-50 text-gray-500 px-4 py-3 font-semibold border-r border-gray-200">Rp</div>
-                <input
-                  type="text" 
-                  placeholder="0"
-                  className="w-full p-3 outline-none text-gray-800 font-bold text-lg"
-                  value={newBudget.amount}
-                  onChange={(e) => {
-                    const rawValue = e.target.value;
-                    const numericValue = rawValue.replace(/[^0-9]/g, "");
-                    const formattedValue = numericValue ? formatNumber(numericValue) : "";
-                    setNewBudget({ ...newBudget, amount: formattedValue });
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition"
-                onClick={() => {
-                  setShowAdd(false);
-                  setNewBudget({ category_id: "", amount: "", period_start: "", period_end: "" });
-                }}
-              >
-                Batal
-              </button>
-              <button
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 font-semibold flex items-center gap-2"
-                onClick={handleAdd}
-              >
-                <Plus size={18} /> Tambah
-              </button>
-            </div>
+                    {tab.icon} {tab.label}
+                </button>
+            ))}
           </div>
+
+          {/* List Budget */}
+          {loading ? (
+            <div className="text-center py-20 text-gray-400 flex flex-col items-center gap-2">
+                <Loader2 className="animate-spin" size={32}/>
+                Loading budgets...
+            </div>
+          ) : budgets.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <p className="text-gray-400 text-lg mb-2">Tidak ada budget dengan status <b>"{filterStatus}"</b>.</p>
+                {filterStatus === 'active' && (
+                    <button onClick={() => setShowAdd(true)} className="text-blue-600 font-semibold hover:underline">
+                        Buat budget baru sekarang
+                    </button>
+                )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+              {budgets.map((item) => {
+                const budgetId = item.budget_id;
+                const categoryName = item.category_name;
+                const limit = Number(item.limit_amount);
+                const spent = Number(item.used_amount);
+                
+                const percent = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+                const safePercent = percent > 100 ? 100 : percent; 
+                const barColor = filterStatus === 'upcoming' ? 'bg-blue-200' : getBarColor(percent); // Abu-abu jika belum mulai
+
+                const catStyle = Object.keys(categoryIcons).find(key => categoryName.includes(key)) 
+                                ? categoryIcons[Object.keys(categoryIcons).find(key => categoryName.includes(key))]
+                                : categoryIcons["Default"];
+
+                return (
+                  <div
+                    key={budgetId}
+                    className={`p-5 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all bg-white flex flex-col justify-between group relative ${filterStatus === 'expired' ? 'opacity-75 grayscale-[0.3]' : ''}`}
+                  >
+                    <div>
+                        {/* Header Kartu */}
+                        <div className="flex justify-between items-start mb-4">
+                             {/* Badge Tanggal */}
+                             <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">
+                                <Calendar size={12} />
+                                <span>{formatDate(item.period_start)} - {formatDate(item.period_end)}</span>
+                             </div>
+                             
+                             <button 
+                                onClick={() => handleDelete(budgetId)}
+                                className="p-1.5 text-black hover:text-red-500 hover:bg-red-50 rounded-lg transition opacity-0 group-hover:opacity-100"
+                                title="Hapus Budget"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-12 h-12 flex items-center justify-center rounded-full text-xl shadow-inner ${catStyle.color} bg-opacity-90 text-white`}>
+                                {catStyle.icon}
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-800 line-clamp-1">{categoryName}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    {filterStatus === 'active' ? 'Sedang Berjalan' : filterStatus === 'upcoming' ? 'Akan Datang' : 'Selesai'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-2">
+                            <div className="flex justify-between text-sm mb-1">
+                                <span className={`font-bold ${percent > 100 ? 'text-red-600' : 'text-gray-700'}`}>{percent}%</span>
+                                <span className="text-gray-400 text-xs">Terpakai</span>
+                            </div>
+                            <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                    className={`${barColor} h-full rounded-full transition-all duration-700 ease-out`}
+                                    style={{ width: `${safePercent}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Info Nominal */}
+                        <div className="flex justify-between items-end text-sm mt-3 pt-3 border-t border-gray-50">
+                            <div>
+                                <p className="text-xs text-gray-400">Terpakai</p>
+                                <p className={`font-semibold ${percent > 100 ? "text-red-600" : "text-gray-800"}`}>{formatRupiah(spent)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-xs text-gray-400">Limit</p>
+                                <p className="font-bold text-gray-800">{formatRupiah(limit)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tombol Edit (Hanya jika belum expired) */}
+                    {filterStatus !== 'expired' && (
+                        <button
+                        className="w-full mt-4 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition font-medium border border-gray-100 text-sm flex items-center justify-center gap-2"
+                        onClick={() => setEditData({ id: budgetId, name: categoryName, limit: formatNumber(limit) })}
+                        >
+                        <Edit2 size={14}/> Edit Limit
+                        </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

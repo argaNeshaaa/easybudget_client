@@ -9,7 +9,7 @@ import EditTransactionModal from "./EditTransactionModal";
 import AddTransactionModal from "./AddTransactionModal";
 import AddCategoryModal from "./AddCategoryModal"; // <--- Import Component Baru
 import "../../assets/styles/global.css";
-
+import Swal from "sweetalert2";
 export default function Transactions() {
   // --- STATE MANAGEMENT ---
   const [transactions, setTransactions] = useState([]);
@@ -118,19 +118,50 @@ export default function Transactions() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Yakin ingin menghapus transaksi ini?")) {
-        try {
-            const token = localStorage.getItem("token");
-            await api.delete(`/transactions/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchTransactions();
-        } catch (err) {
-            alert("Gagal menghapus");
+const handleDelete = (id) => {
+    Swal.fire({
+        title: "Yakin ingin menghapus?",
+        text: "Transaksi yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33", // Warna merah untuk tombol hapus
+        cancelButtonColor: "#3085d6", // Warna biru/abu untuk batal
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal"
+    }).then(async (result) => {
+        // Cek jika tombol "Ya, Hapus!" diklik
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem("token");
+                
+                await api.delete(`/transactions/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                // Tampilkan pesan sukses sebentar
+                Swal.fire({
+                    title: "Terhapus!",
+                    text: "Transaksi berhasil dihapus.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Refresh data
+                fetchTransactions();
+
+            } catch (err) {
+                console.error(err);
+                // Tampilkan pesan error
+                Swal.fire({
+                    title: "Gagal!",
+                    text: err.response?.data?.message || "Gagal menghapus transaksi.",
+                    icon: "error"
+                });
+            }
         }
-    }
-  }
+    });
+};
 
   const handleEditClick = (transaction) => {
     setSelectedTransaction(transaction); // Simpan data transaksi yang mau diedit

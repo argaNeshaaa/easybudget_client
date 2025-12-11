@@ -78,7 +78,7 @@ function Wallet() {
   const totalGlobalIncome = accounts.reduce((sum, acc) => sum + Number(acc.total_income), 0);
   const totalGlobalExpense = accounts.reduce((sum, acc) => sum + Number(acc.total_expense), 0);
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-gray-100">Loading Wallet...</div>;
+  // if (loading) return <div className="h-screen flex items-center justify-center bg-gray-100">Loading Wallet...</div>;
 
   return (
     <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
 import api from "../../api/axios";
-
+import toast from "react-hot-toast";
 export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -92,6 +92,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      toast.success("Tambah Transaksi Berhasil!");
       onSuccess(); // Refresh parent
       onClose();   // Tutup modal
       
@@ -106,7 +107,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
 
     } catch (err) {
       console.error("Gagal tambah transaksi:", err);
-      alert(err.response?.data?.message || "Gagal menyimpan transaksi");
+      toast.error(err.response?.data?.message || "Gagal menyimpan transaksi");
     } finally {
       setLoading(false);
     }
@@ -169,7 +170,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full text-black p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
           </div>
@@ -183,7 +184,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                 value={formData.account_id}
                 onChange={handleChange}
                 required
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <option value="" disabled>-- Pilih Akun --</option>
                 {accounts.length > 0 ? (
@@ -205,7 +206,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                 value={formData.category_id}
                 onChange={handleChange}
                 required
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full  text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <option value="" disabled>-- Pilih Kategori --</option>
                 {filteredCategories.length > 0 ? (
@@ -232,7 +233,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
               onChange={handleChange}
               required
               min="1"
-              className="w-full p-4 text-lg font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full text-black p-4 text-lg font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -245,7 +246,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
               placeholder="Contoh: Makan siang nasi padang..."
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             ></textarea>
           </div>
 

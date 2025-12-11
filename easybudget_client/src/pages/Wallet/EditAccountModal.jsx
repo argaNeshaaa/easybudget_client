@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
 import api from "../../api/axios";
-
+import toast from "react-hot-toast";
 export default function EditAccountModal({ isOpen, onClose, onSuccess, accountData }) {
   const [loading, setLoading] = useState(false);
   const [wallets, setWallets] = useState([]);
@@ -52,7 +52,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
   useEffect(() => {
     if (isOpen && accountData) {
       setFormData({
-        wallet_id: accountData.wallet_id || "", // Pastikan backend kirim wallet_id di /stats, jika tidak default ke yang ada
+        // wallet_id: accountData.wallet_id || "", // Pastikan backend kirim wallet_id di /stats, jika tidak default ke yang ada
         account_name: accountData.account_name,
         account_number: accountData.account_number,
         account_type: accountData.account_type,
@@ -82,7 +82,8 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      onSuccess(); // Refresh data di parent
+      toast.success("Edit Akun Berhasil!");
+      onSuccess();
       onClose();
     } catch (err) {
       console.error("Gagal update akun:", err);
@@ -113,14 +114,14 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Wallet</label>
             <select
               name="wallet_id"
               value={formData.wallet_id}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="" disabled>-- Pilih Wallet --</option>
               {wallets.map((w) => (
@@ -129,7 +130,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -140,7 +141,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
                 value={formData.account_name}
                 onChange={handleChange}
                 required
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
@@ -150,7 +151,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
                 name="account_type"
                 value={formData.account_type}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
                 <option value="bank">Bank</option>
                 <option value="ewallet">E-Wallet</option>
@@ -168,7 +169,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
               onChange={handleChange}
               required
               disabled={isCash}
-              className={`w-full p-3 border rounded-xl focus:outline-none transition ${isCash ? "bg-gray-200 cursor-not-allowed" : "bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-500"}`}
+              className={`w-full text-black p-3 border rounded-xl focus:outline-none transition ${isCash ? "bg-gray-200 cursor-not-allowed" : "bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-500"}`}
             />
           </div>
 
@@ -180,7 +181,7 @@ export default function EditAccountModal({ isOpen, onClose, onSuccess, accountDa
               value={formData.balance}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <p className="text-xs text-red-500 mt-1">*Mengubah saldo secara manual akan mempengaruhi total aset tanpa tercatat di riwayat transaksi.</p>
           </div>

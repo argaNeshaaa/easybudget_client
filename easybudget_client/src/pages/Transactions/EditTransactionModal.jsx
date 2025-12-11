@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
 import api from "../../api/axios";
-
+import toast from "react-hot-toast";
 export default function EditTransactionModal({ isOpen, onClose, onSuccess, transactionData }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -84,11 +84,12 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      toast.success("Edit Transaksi Berhasil!");
       onSuccess(); 
       onClose();   
     } catch (err) {
       console.error("Gagal update transaksi:", err);
-      alert(err.response?.data?.message || "Gagal mengupdate transaksi");
+      toast.error(err.response?.data?.message || "Gagal mengupdate transaksi");
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
               >
                 <option value="income">Pemasukan</option>
                 <option value="expense">Pengeluaran</option>
@@ -138,7 +139,7 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -152,7 +153,7 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
               value={formData.amount}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -164,7 +165,7 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
               value={formData.category_id}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
             >
               <option value="" disabled>-- Pilih Kategori --</option>
               {filteredCategories.length > 0 ? (
@@ -187,7 +188,7 @@ export default function EditTransactionModal({ isOpen, onClose, onSuccess, trans
               rows="3"
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
             ></textarea>
           </div>
 

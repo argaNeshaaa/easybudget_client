@@ -79,6 +79,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      toast.success("Tambah Akun Berhasil!");
       onSuccess();
       onClose();
       
@@ -91,7 +92,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
       });
     } catch (err) {
       console.error("Gagal tambah akun:", err);
-      alert(err.response?.data?.message || "Gagal membuat akun");
+      toast.error(err.response?.data?.message || "Gagal membuat akun");
     } finally {
       setLoading(false);
     }
@@ -127,7 +128,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
               value={formData.wallet_id}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="" disabled>-- Pilih Wallet --</option>
               {wallets.length > 0 ? (
@@ -152,7 +153,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
                 value={formData.account_name}
                 onChange={handleChange}
                 required
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
@@ -162,7 +163,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
                 name="account_type"
                 value={formData.account_type}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
                 <option value="bank">Bank</option>
                 <option value="ewallet">E-Wallet</option>
@@ -184,7 +185,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
               onChange={handleChange}
               required // Tetap required, tapi value sudah diisi "-" otomatis jika cash
               disabled={isCash} // Matikan input jika Cash
-              className={`w-full p-3 border rounded-xl focus:outline-none transition
+              className={`w-full text-black p-3 border rounded-xl focus:outline-none transition
                 ${isCash 
                   ? "bg-gray-200 text-gray-500 border-gray-200 cursor-not-allowed" 
                   : "bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-500"
@@ -201,7 +202,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
               value={formData.balance}
               onChange={handleChange}
               required
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full text-black p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 

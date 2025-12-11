@@ -9,7 +9,7 @@ function Report() {
         <Header />
 
       <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-4 z-10">
-        <div className="h-[147vh] text-white flex items-center justify-start flex-col">
+        <div className="h-[147vh] w-full text-white flex items-center justify-start flex-col">
           <FinancialReports />
         </div>
       </div>

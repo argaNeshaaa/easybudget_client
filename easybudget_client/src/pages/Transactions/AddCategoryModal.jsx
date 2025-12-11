@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Save, Loader2, Tag } from "lucide-react";
 import api from "../../api/axios";
-
+import toast from "react-hot-toast";
 export default function AddCategoryModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
@@ -33,12 +33,11 @@ export default function AddCategoryModal({ isOpen, onClose, onSuccess }) {
         name: "",
         type: "expense",
       });
-      
-      alert("Kategori berhasil ditambahkan!");
+      toast.success("Kategori berhasil ditambahkan!");
 
     } catch (err) {
       console.error("Gagal tambah kategori:", err);
-      alert(err.response?.data?.message || "Gagal menyimpan kategori");
+      toast.error(err.response?.data?.message || "Gagal menyimpan kategori");
     } finally {
       setLoading(false);
     }
@@ -106,7 +105,7 @@ export default function AddCategoryModal({ isOpen, onClose, onSuccess }) {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                className="w-full text-black pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
               />
             </div>
           </div>

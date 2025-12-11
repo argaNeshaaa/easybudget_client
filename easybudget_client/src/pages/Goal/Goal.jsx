@@ -1,342 +1,237 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
+import { Plus, Loader2, Target, Trophy, Coins, PlayCircle, XCircle } from "lucide-react";
+import api from "../../api/axios";
+import GoalCard from "./GoalCard";
+import AddGoalModal from "./AddGoalModal";
+import AddMoneyModal from "./AddMoneyModal";
 import "../../assets/styles/global.css";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { Wallet, Plus, MoreHorizontal, ChevronLeft, X } from "lucide-react";
+import Swal from "sweetalert2";
+export default function Goals() {
+  const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState("all"); // all, ongoing, achieved, failed
+  
+  // Modals
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(null);
 
-const chartData = [
-  { name: "Jan", tabungan: 500000 },
-  { name: "Feb", tabungan: 1200000 },
-  { name: "Mar", tabungan: 900000 },
-  { name: "Apr", tabungan: 1800000 },
-  { name: "May", tabungan: 2400000 },
-  { name: "Jun", tabungan: 2000000 },
-];
+  const token = localStorage.getItem("token");
 
-const goalsDataInitial = [
-  { id: 1, title: "PC Gaming", current: 3000000, target: 6000000, deadline: "Sep, 2025" },
-  { id: 2, title: "Motor", current: 10000000, target: 20000000, deadline: "Sep, 2025" },
-  { id: 3, title: "Top up Game", current: 500000, target: 1000000, deadline: "Sep, 2025" },
-  { id: 4, title: "Jalan Jalan", current: 1000000, target: 2000000, deadline: "Sep, 2025" },
-  { id: 5, title: "Beli Game", current: 500000, target: 1000000, deadline: "Sep, 2025" },
-];
-
-// Gauge (half donut) data
-const gaugeData = [
-  { name: "Tercapai", value: 500000 },
-  { name: "Sisa", value: 500000 }, // contoh: total target bulan ini 1jt
-];
-const GAUGE_COLORS = ["#14b8a6", "#e2e8f0"]; // teal & light gray
-
-function Goal() {
-  const [viewMode, setViewMode] = useState("dashboard"); // 'dashboard' or 'grid'
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [goalsData, setGoalsData] = useState(goalsDataInitial);
-  const [formData, setFormData] = useState({ name: "", collected: "", target: "", deadline: "" });
-
-  // Format currency (IDR)
-  const formatRupiah = (number) => {
-    if (typeof number !== "number") return number;
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(number);
+  // --- HELPER ---
+  const getUserIdFromToken = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload).user_id;
+    } catch (e) { return null; }
   };
 
-  // calculate progress in percent (0..100)
-  const calculateProgress = (current, target) => {
-    if (!target || target === 0) return 0;
-    return Math.min(Math.round((current / target) * 100), 100);
+  const formatRupiah = (num) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(num);
+
+  // --- API CALL ---
+  const fetchGoals = async () => {
+    const userId = getUserIdFromToken(token);
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      // Kirim parameter status jika bukan 'all'
+      const params = filterStatus !== 'all' ? { status: filterStatus } : {};
+      
+      const res = await api.get(`/goals/users/${userId}`, { 
+          headers: { Authorization: `Bearer ${token}` },
+          params: params
+      });
+      setGoals(res.data.data);
+    } catch (err) {
+      console.error("Gagal load goals:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // handle add goal (local demo)
-  const handleAddGoal = () => {
-    const nextId = goalsData.length ? Math.max(...goalsData.map((g) => g.id)) + 1 : 1;
-    const parsedTarget = Number(String(formData.target).replace(/\D/g, "")) || 0;
-    const parsedCollected = Number(String(formData.collected).replace(/\D/g, "")) || 0;
+  // Fetch ulang saat filter berubah
+  useEffect(() => {
+    if (token) fetchGoals();
+  }, [token, filterStatus]);
 
-    const newGoal = {
-      id: nextId,
-      title: formData.name || "Untitled",
-      current: parsedCollected,
-      target: parsedTarget,
-      deadline: formData.deadline || "TBD",
-    };
-    setGoalsData((prev) => [newGoal, ...prev]);
-    setIsModalOpen(false);
-    setFormData({ name: "", collected: "", target: "", deadline: "" });
+  // --- HANDLERS ---
+  const handleDelete = (id) => {
+    Swal.fire({
+        title: "Hapus Goal?",
+        text: "Apakah Anda yakin ingin menghapus goal ini? Data tidak bisa dikembalikan.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33", // Warna merah (tanda bahaya)
+        cancelButtonColor: "#3085d6", // Warna biru (tombol batal)
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal"
+    }).then(async (result) => {
+        // Logika ini hanya jalan jika user menekan tombol "Ya, Hapus!"
+        if (result.isConfirmed) {
+            try {
+                // Ambil token (pastikan variable token tersedia di scope ini atau ambil dari localStorage)
+                const token = localStorage.getItem("token"); 
+
+                await api.delete(`/goals/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                // Tampilkan pesan sukses singkat (langsung hilang sendiri)
+                Swal.fire({
+                    title: "Terhapus!",
+                    text: "Goal berhasil dihapus.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Update tampilan data
+                fetchGoals();
+
+            } catch (err) {
+                console.error(err);
+                // Tampilkan pesan error jika gagal
+                Swal.fire({
+                    title: "Gagal!",
+                    text: err.response?.data?.message || "Gagal menghapus goal.",
+                    icon: "error"
+                });
+            }
+        }
+    });
+};
+
+  const handleOpenTopUp = (goal) => {
+      setSelectedGoal(goal);
+      setIsTopUpOpen(true);
   };
+
+  // Ringkasan (Dihitung dari semua data sebelum difilter di backend sebaiknya, 
+  // tapi karena backend filter, ringkasan ini akan mengikuti filter aktif. 
+  // Jika ingin ringkasan total global, perlu endpoint terpisah atau fetch 'all' dulu lalu filter client-side.
+  // Di sini kita asumsikan ringkasan mengikuti apa yang ditampilkan)
+  const totalTarget = goals.reduce((sum, g) => sum + Number(g.target_amount), 0);
+  const totalSaved = goals.reduce((sum, g) => sum + Number(g.current_amount), 0);
+  const goalCount = goals.length;
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito">
+    <div className="flex h-screen w-full bg-gray-100 font-gabarito overflow-hidden">
       <Sidebar />
-      <Header />
-      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-6 z-10">
-        <main className="flex-1 overflow-y-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Goals</h1>
-            <p className="text-sm text-gray-500">
-              Selamat datang! {/* kamu bisa ubah nama dinamis */}
-            </p>
-          </div>
+        <Header />
+      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] p-8 overflow-y-auto rounded-lg">
 
-          {viewMode === "dashboard" ? (
-            <div className="grid grid-cols-12 gap-6">
-              {/* Left: charts and stats */}
-              <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-                {/* Row: Tabungan & Target Gauge */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white p-6 rounded-2xl shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <div className="z-10">
-                      <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4 text-teal-600">
-                        <Wallet size={20} />
-                      </div>
-                      <h3 className="text-gray-500 font-medium">Tabungan</h3>
-                      <p className="text-2xl font-bold text-gray-800 mt-1">Rp 2.000.000</p>
-                      <p className="text-xs text-gray-400 mt-1">Total Tabungan</p>
-                    </div>
-                    <div className="absolute -right-6 -bottom-6 w-36 h-36 bg-teal-50 rounded-full opacity-50"></div>
-                  </div>
-
-                  <div className="bg-white p-6 rounded-2xl shadow-sm flex flex-col items-center justify-between">
-                    <div className="w-full flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-gray-800">Target</h3>
-                      <span className="text-xs text-gray-400">Nov, 2025</span>
-                    </div>
-
-                    <div className="flex items-center w-full justify-between">
-                      <div className="flex flex-col gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-400 text-xs">Target Tercapai</p>
-                          <p className="font-bold text-gray-800">Rp 500.000</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400 text-xs">Target Bulan INI</p>
-                          <p className="font-bold text-gray-800">Rp 1.000.000</p>
-                        </div>
-                      </div>
-
-                      {/* Gauge (half donut) */}
-                      <div className="w-36 h-36 relative flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={gaugeData}
-                              cx="50%"
-                              cy="50%"
-                              startAngle={180}
-                              endAngle={0}
-                              innerRadius={35}
-                              outerRadius={55}
-                              paddingAngle={2}
-                              dataKey="value"
-                              stroke="none"
-                            >
-                              {gaugeData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={GAUGE_COLORS[index % GAUGE_COLORS.length]} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-
-                        <div className="absolute top-[45%] text-center -translate-y-1/2">
-                          <span className="text-lg font-bold block">500k</span>
-                          <span className="text-[10px] text-gray-400">Target vs Pencapaian</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button className="bg-teal-600 text-white text-xs py-1 px-4 rounded-full mt-2 hover:bg-teal-700 transition">
-                      Ubah Target
-                    </button>
-                  </div>
-                </div>
-
-                {/* Statistik Tabungan (Area Chart) */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm h-[22rem] flex flex-col">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-lg text-gray-800">Statistik Tabungan</h3>
-                    <select className="border border-gray-200 text-sm rounded-lg p-1 text-gray-500 bg-transparent outline-none">
-                      <option>6 Month</option>
-                      <option>1 Year</option>
-                    </select>
-                  </div>
-
-                  <div className="flex-1 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <defs>
-                          <linearGradient id="colorTabungan" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-
-                        <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                        <YAxis
-                          tick={{ fontSize: 12, fill: "#94a3b8" }}
-                          axisLine={false}
-                          tickLine={false}
-                          tickFormatter={(value) => `${value / 1000000}Jt`}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#fff",
-                            borderRadius: "10px",
-                            border: "none",
-                            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                          }}
-                          formatter={(value) => formatRupiah(value)}
-                        />
-                        <Area type="monotone" dataKey="tabungan" stroke="#14b8a6" strokeWidth={3} fillOpacity={1} fill="url(#colorTabungan)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+        <main className="flex-1 overflow-y-auto bg-[#E5E9F1]">
+          <div className="max-w-auto mx-auto flex flex-col gap-6">
+            
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">Financial Goals</h1>
+                <p className="text-gray-500 mt-1">Wujudkan impianmu dengan menabung secara teratur.</p>
               </div>
-
-              {/* Right: Goals list */}
-              <div className="col-span-12 lg:col-span-4 bg-white p-6 rounded-2xl shadow-sm h-full flex flex-col">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-bold text-lg text-gray-800">Target</h3>
-                  <button onClick={() => setViewMode("grid")} className="text-sm text-teal-600 font-medium hover:underline">
-                    View all
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
-                  {goalsData.map((goal) => (
-                    <div key={goal.id} className="w-full">
-                      <div className="flex justify-between mb-1">
-                        <span className="font-semibold text-gray-700">{goal.title}</span>
-                        <span className="text-xs font-bold text-gray-500">{calculateProgress(goal.current, goal.target)}%</span>
-                      </div>
-
-                      <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
-                        <div className="bg-teal-500 h-2 rounded-full" style={{ width: `${calculateProgress(goal.current, goal.target)}%` }}></div>
-                      </div>
-
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>{formatRupiah(goal.current)} / {`${goal.target / 1000000}Jt`}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-auto pt-4">
-                  <button onClick={() => setIsModalOpen(true)} className="w-full bg-teal-600 text-white py-3 rounded-xl shadow-lg hover:bg-teal-700 transition flex items-center justify-center gap-2 font-medium">
-                    <Plus size={16} /> Tambah
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Grid / View All Mode */
-            <div className="flex flex-col h-full">
-              <button onClick={() => setViewMode("dashboard")} className="mb-4 flex items-center text-teal-600 gap-2 font-semibold hover:underline w-fit">
-                <ChevronLeft size={16} /> Kembali ke Dashboard
+              <button 
+                onClick={() => setIsAddOpen(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+              >
+                <Plus size={20} />
+                Target Baru
               </button>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-                {goalsData.map((goal) => (
-                  <div key={goal.id} className="bg-white p-6 rounded-2xl shadow-sm relative">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-bold text-lg">{goal.title}</h3>
-                      <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal size={18} /></button>
-                    </div>
-
-                    <div className="mb-2">
-                      <p className="text-sm font-semibold text-gray-700">Target Rp {goal.target / 1000000}Jt</p>
-                      <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
-                        <div className="bg-teal-500 h-2 rounded-full" style={{ width: `${calculateProgress(goal.current, goal.target)}%` }}></div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
-                      <span>{formatRupiah(goal.current)} / {`${goal.target / 1000000}Jt`}</span>
-                      <span>{calculateProgress(goal.current, goal.target)}%</span>
-                    </div>
-
-                    <div className="flex justify-between text-xs text-gray-400 mb-4">
-                      <div>
-                        <p>Tenggat Waktu</p>
-                        <p className="text-gray-600 font-medium mt-1">{goal.deadline}</p>
-                      </div>
-                      <div className="text-right">
-                        <p>Remaining</p>
-                        <p className="text-gray-600 font-medium mt-1">{formatRupiah(goal.target - goal.current)}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button className="bg-teal-600 text-white px-4 py-1.5 rounded-lg text-xs hover:bg-teal-700">Edit</button>
-                    </div>
-                  </div>
-                ))}
-
-                <div className="bg-white p-6 rounded-2xl shadow-sm border-2 border-dashed border-gray-200 flex flex-col items-center justify-center min-h-[250px] cursor-pointer hover:border-teal-500 group transition" onClick={() => setIsModalOpen(true)}>
-                  <button className="bg-teal-600 text-white px-6 py-3 rounded-lg font-medium shadow-md group-hover:bg-teal-700 transition">Tambah Goals</button>
+            {/* SUMMARY CARD */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex items-center gap-4 border-r border-gray-100 last:border-0 pr-4">
+                <div className="p-3 bg-blue-100 rounded-full text-blue-600"><Target size={24} /></div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Total Target Dana</p>
+                  <p className="text-xl font-bold text-gray-800">{formatRupiah(totalTarget)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 border-r border-gray-100 last:border-0 pr-4">
+                <div className="p-3 bg-green-100 rounded-full text-green-600"><Coins size={24} /></div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Sudah Terkumpul</p>
+                  <p className="text-xl font-bold text-gray-800">{formatRupiah(totalSaved)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-yellow-100 rounded-full text-yellow-600"><Trophy size={24} /></div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Jumlah Goals</p>
+                  <p className="text-xl font-bold text-gray-800">{goalCount}</p>
                 </div>
               </div>
             </div>
-          )}
-        </main>
-      </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Tambah Goal</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+            {/* --- FILTER TABS --- */}
+            <div className="flex gap-2 border-b border-gray-200 pb-1 overflow-x-auto">
+                {[
+                    { key: 'all', label: 'Semua', icon: <Target size={16}/> },
+                    { key: 'ongoing', label: 'Sedang Berjalan', icon: <PlayCircle size={16}/> },
+                    { key: 'achieved', label: 'Tercapai', icon: <Trophy size={16}/> },
+                    { key: 'failed', label: 'Gagal / Lewat', icon: <XCircle size={16}/> }
+                ].map(tab => (
+                    <button 
+                        key={tab.key}
+                        onClick={() => setFilterStatus(tab.key)}
+                        className={`flex items-center gap-2 px-4 py-2 font-medium text-sm rounded-t-lg transition-all whitespace-nowrap ${
+                            filterStatus === tab.key 
+                            ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" 
+                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
             </div>
 
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleAddGoal(); }}>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Goals</label>
-                <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} type="text" placeholder="Laptop" className=" text-black placeholder-gray-400 w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+            {/* LIST GOALS */}
+            {loading ? (
+              <div className="flex justify-center items-center h-64 text-gray-400 flex-col gap-2">
+                  <Loader2 className="animate-spin" size={32} />
+                  Loading...
               </div>
+            ) : goals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+                <p className="text-gray-400 mb-4 text-lg">Tidak ada goal dengan status <b>"{filterStatus}"</b>.</p>
+                {filterStatus === 'all' && (
+                    <button onClick={() => setIsAddOpen(true)} className="text-blue-600 font-semibold hover:underline">Buat sekarang</button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+                {goals.map((goal) => (
+                  <GoalCard 
+                    key={goal.goal_id} 
+                    goal={goal} 
+                    onDelete={handleDelete}
+                    onAddMoney={handleOpenTopUp}
+                  />
+                ))}
+              </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Terkumpul (angka saja)</label>
-                <input value={formData.collected} onChange={(e) => setFormData({ ...formData, collected: e.target.value })} type="text" placeholder="1000000" className="text-black placeholder-gray-400 w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Target (angka saja)</label>
-                <input value={formData.target} onChange={(e) => setFormData({ ...formData, target: e.target.value })} type="text" placeholder="2000000" className=" text-black placeholder-gray-400 w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Tenggat Waktu</label>
-                <input value={formData.deadline} onChange={(e) => setFormData({ ...formData, deadline: e.target.value })} type="text" placeholder="Sep, 2025" className=" text-black placeholder-gray-400 w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500" />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 rounded-xl bg-teal-600/10 text-teal-700 font-semibold hover:bg-teal-600/20 transition">Back</button>
-                <button type="submit" className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold shadow-lg hover:bg-teal-700 transition">Tambah</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        </main>
+
+        {/* MODALS */}
+        <AddGoalModal 
+            isOpen={isAddOpen} 
+            onClose={() => setIsAddOpen(false)} 
+            onSuccess={fetchGoals} 
+        />
+
+        <AddMoneyModal 
+            isOpen={isTopUpOpen} 
+            onClose={() => setIsTopUpOpen(false)} 
+            onSuccess={fetchGoals}
+            goalData={selectedGoal}
+        />
+
+      </div>
     </div>
   );
 }
-
-export default Goal;
