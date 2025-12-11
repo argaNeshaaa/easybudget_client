@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
 import api from "../../api/axios";
-
+import toast from "react-hot-toast";
 export default function AddAccountModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [wallets, setWallets] = useState([]); 
