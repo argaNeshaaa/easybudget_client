@@ -2,7 +2,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Hero from "./pages/Hero/Hero";
-import IndexAuth from "./pages/Auth/indexAuth";
+import IndexAuth from "./pages/Auth/IndexAuth";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Wallet from "./pages/Wallet/Wallet";
 import Transaction from "./pages/Transactions/Transaction";
