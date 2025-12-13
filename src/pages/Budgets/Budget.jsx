@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, X, Save, Loader2, Clock, Calendar, CheckCircle, Al
 import api from "../../api/axios";
 import "../../assets/styles/global.css";
 import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 export default function Budget() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
