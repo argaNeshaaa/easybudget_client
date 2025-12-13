@@ -59,7 +59,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-[18%] h-full bg-[#15213F] z-30 flex flex-col justify-between pb-6">
+    <div className="hidden block fixed top-0 left-0 w-[18%] h-full bg-[#15213F] z-30 lg:flex flex-col justify-between pb-6">
       
       {/* BAGIAN ATAS: LOGO & MENU */}
       <div className="w-full">
@@ -194,9 +194,10 @@ const navigate = useNavigate();
 
 return (
         <>
-            <div className="fixed top-0 left-[18%] w-[82%] h-[10%] bg-white z-20 flex items-center justify-between px-8 shadow-sm">
+            <div className="fixed top-0 lg:left-[18%] w-full lg:w-[82%] h-[5rem] lg:h-[10%] bg-white z-20 flex items-center justify-between px-8 shadow-sm">
                 {/* Title */}
-                <div className="font-gabarito font-bold text-[2rem] text-gray-800">
+                <div className="font-gabarito font-bold flex text-[2rem] text-gray-800">
+                    <p className="hidden">icon</p>
                     <h1>{currentTitle}</h1>
                 </div>
 

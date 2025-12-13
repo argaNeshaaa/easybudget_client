@@ -62,7 +62,7 @@ export default function ForgotPasswordPages({ onBack }) {
   };
 
   return (
-    <div className="font-gabarito w-[28rem] min-h-[30rem] bg-white rounded-[3rem] flex flex-col items-center p-8 shadow-2xl relative animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="font-gabarito w-[95%] sm:w-[28rem] min-h-[30rem] bg-white rounded-[3rem] flex flex-col items-center p-8 shadow-2xl relative animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Tombol Back (Hanya jika belum sukses) */}
       {step < 4 && (

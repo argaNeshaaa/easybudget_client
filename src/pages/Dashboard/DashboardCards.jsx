@@ -129,7 +129,7 @@ export default function DashboardCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full ml-[1rem] mr-[1rem]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-6 w-full lg:ml-[1rem] lg:mr-[1rem]">
       {stats.map((item, index) => (
         <div
           key={index}

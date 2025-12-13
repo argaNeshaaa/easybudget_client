@@ -64,18 +64,18 @@ function LoginPage({ onSwitch }) {
   return (
     <form
       onSubmit={handleLogin}
-      className="login-box font-gabarito w-[28rem] h-[45rem] bg-[#ffffff] rounded-[3rem] mr-[3rem] flex flex-col items-center animate-in fade-in duration-300"
+      className="login-box font-gabarito w-[95%] sm:w-[28rem] h-[75%] sm:h-[45rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center animate-in fade-in duration-300"
     >
       {/* ... (Header & Input Email Password SAMA SEPERTI SEBELUMNYA) ... */}
       <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[2.5rem]">
         Selamat Datang
       </h1>
-      <p className="text-black font-gabarito pt-[1rem]">
+      <p className="text-black font-gabarito pt-[1rem] text-center w-[88%]">
         Masukkan Email dan Kata Sandi untuk akses akun anda.
       </p>
 
       {/* Email */}
-      <div className="w-[88%] pt-[4rem] flex flex-col ">
+      <div className="w-[88%] pt-[2.5rem] sm:pt-[4rem] flex flex-col ">
         <label htmlFor="" className="block text-gray-700 font-medium mb-1">
           Email
         </label>

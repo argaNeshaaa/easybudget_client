@@ -57,7 +57,7 @@ function RegisterPage({ onSwitch }) {
 
   return (
     <>
-      <div className="register-box font-gabarito w-[28rem] h-[50rem] bg-[#ffffff] rounded-[3rem] mr-[3rem] flex flex-col items-center">
+      <div className="register-box font-gabarito w-[95%] sm:w-[28rem] sm:h-[50rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center">
         <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[2.5rem]">
           Buat Akun
         </h1>
@@ -76,7 +76,7 @@ function RegisterPage({ onSwitch }) {
             placeholder="Masukan Nama"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full mb-4 px-4 py-2 text-black font-gabarito rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]"
+            className="w-full mb-4 px-4 py-3 text-black font-gabarito rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
         </div>
 
@@ -133,7 +133,7 @@ function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Button Register */}
-        <div className="w-[88%] pt-[5rem]">
+        <div className="w-[88%] pt-[3rem]">
           <button
             type="submit"
             onClick={handleRegister}
@@ -143,7 +143,7 @@ function RegisterPage({ onSwitch }) {
           </button>
         </div>
 
-        <p className="text-center text-sm mt-6 text-gray-700">
+        <p className="text-center text-sm mt-6 text-gray-700 mb-4">
           Sudah Punya Akun?{" "}
           <button
             onClick={onSwitch}
