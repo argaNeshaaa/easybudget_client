@@ -19,7 +19,7 @@ function LoginPage({ onSwitch }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-
+  const [rememberMe, setRememberMe] = useState(false);
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -33,19 +33,26 @@ function LoginPage({ onSwitch }) {
 
       console.log("LOGIN RESPONSE:", res.data);
 
-      // Jika server mengirim token
+      // MODIFIKASI BAGIAN INI
       if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
+        if (rememberMe) {
+          // Jika "Ingat Saya" dicentang -> Simpan Permanen (LocalStorage)
+          localStorage.setItem("token", res.data.token);
+          sessionStorage.removeItem("token"); // Bersihkan session jika ada sisa
+        } else {
+          // Jika TIDAK dicentang -> Simpan Sementara (SessionStorage)
+          sessionStorage.setItem("token", res.data.token);
+          localStorage.removeItem("token"); // Bersihkan local jika ada sisa
+        }
       }
 
       Swal.fire({
         icon: "success",
         title: "Login Berhasil",
         text: "Selamat datang kembali!",
-        showConfirmButton: false, // Hilangkan tombol
-        timer: 2000, // Hilang otomatis setelah 2 detik
+        showConfirmButton: false, 
+        timer: 2000, 
       }).then(() => {
-        // Navigasi dilakukan SETELAH timer selesai
         navigate("/dashboard");
       });
     } catch (err) {
@@ -64,18 +71,18 @@ function LoginPage({ onSwitch }) {
   return (
     <form
       onSubmit={handleLogin}
-      className="login-box font-gabarito w-[95%] sm:w-[28rem] h-[75%] sm:h-[45rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center animate-in fade-in duration-300"
+      className="login-box font-gabarito w-[95%] sm:w-[23rem] 2xl:w-[28rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center animate-in fade-in duration-300"
     >
       {/* ... (Header & Input Email Password SAMA SEPERTI SEBELUMNYA) ... */}
-      <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[2.5rem]">
+      <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[1rem]  2xl:mt-[2.5rem]">
         Selamat Datang
       </h1>
-      <p className="text-black font-gabarito pt-[1rem] text-center w-[88%]">
+      <p className="text-black font-gabarito 2xl:pt-[1rem] text-center w-[88%]">
         Masukkan Email dan Kata Sandi untuk akses akun anda.
       </p>
 
       {/* Email */}
-      <div className="w-[88%] pt-[2.5rem] sm:pt-[4rem] flex flex-col ">
+      <div className="w-[88%] pt-[1rem] 2xl:pt-[4rem] flex flex-col ">
         <label htmlFor="" className="block text-gray-700 font-medium mb-1">
           Email
         </label>
@@ -84,7 +91,7 @@ function LoginPage({ onSwitch }) {
           placeholder="Masukkan Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 mb-4 focus:outline-none focus:ring-2 focus:ring-violet-400"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 mb-2 2xl:mb-4 focus:outline-none focus:ring-2 focus:ring-violet-400"
         />
       </div>
 
@@ -109,8 +116,13 @@ function LoginPage({ onSwitch }) {
 
       {/* --- GANTI BAGIAN LINK LUPA PASSWORD --- */}
       <div className="w-[88%] flex items-center justify-between text-sm mb-6">
-        <label className="flex items-center space-x-2 text-gray-700">
-          <input type="checkbox" />
+        <label className="flex items-center space-x-2 text-gray-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={rememberMe} // 2. Bind value ke state
+            onChange={(e) => setRememberMe(e.target.checked)} // 3. Update state saat diklik
+            className="rounded text-blue-600 focus:ring-blue-500" // Tambahan styling opsional
+          />
           <span>Ingat Saya</span>
         </label>
 
@@ -164,7 +176,7 @@ function LoginPage({ onSwitch }) {
         <button
           type="button"
           onClick={onSwitch}
-          className="text-[#7B61FF] cursor-pointer font-semibold hover:underline"
+          className="text-[#7B61FF] cursor-pointer font-semibold hover:underline mb-5"
         >
           Daftar.
         </button>

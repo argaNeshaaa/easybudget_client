@@ -11,7 +11,7 @@ function PasswordInput({ value, onChange, placeholder }) {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-400"
+        className="w-full px-4 py-3 lg:py-[0.5rem] 2xl:py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-400"
       />
       <button
         type="button"

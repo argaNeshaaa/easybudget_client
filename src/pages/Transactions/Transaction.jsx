@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
 import { 
   Search, Filter, ChevronLeft, ChevronRight, Plus, 
-  Calendar, ArrowUpCircle, ArrowDownCircle, Edit, Trash2, Tag // Tambah icon Tag
+  Calendar, ArrowUpCircle, ArrowDownCircle, Edit, Trash2, Tag
 } from "lucide-react";
 import api from "../../api/axios";
 import EditTransactionModal from "./EditTransactionModal";
 import AddTransactionModal from "./AddTransactionModal";
-import AddCategoryModal from "./AddCategoryModal"; // <--- Import Component Baru
+import AddCategoryModal from "./AddCategoryModal"; 
 import "../../assets/styles/global.css";
 import Swal from "sweetalert2";
+
 export default function Transactions() {
   // --- STATE MANAGEMENT ---
   const [transactions, setTransactions] = useState([]);
@@ -50,7 +51,7 @@ export default function Transactions() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false); // <--- State Modal Kategori
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   // --- API CALL ---
   const fetchTransactions = async () => {
@@ -69,7 +70,6 @@ export default function Transactions() {
         },
       });
 
-      // Validasi response backend
       const responseData = res.data.data;
       if (responseData && responseData.meta) {
         setTransactions(responseData.data);
@@ -118,27 +118,23 @@ export default function Transactions() {
     }
   };
 
-const handleDelete = (id) => {
+  const handleDelete = (id) => {
     Swal.fire({
         title: "Yakin ingin menghapus?",
         text: "Transaksi yang dihapus tidak dapat dikembalikan!",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#d33", // Warna merah untuk tombol hapus
-        cancelButtonColor: "#3085d6", // Warna biru/abu untuk batal
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
         confirmButtonText: "Ya, Hapus!",
         cancelButtonText: "Batal"
     }).then(async (result) => {
-        // Cek jika tombol "Ya, Hapus!" diklik
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem("token");
-                
                 await api.delete(`/transactions/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-
-                // Tampilkan pesan sukses sebentar
                 Swal.fire({
                     title: "Terhapus!",
                     text: "Transaksi berhasil dihapus.",
@@ -146,13 +142,9 @@ const handleDelete = (id) => {
                     timer: 1500,
                     showConfirmButton: false
                 });
-
-                // Refresh data
                 fetchTransactions();
-
             } catch (err) {
                 console.error(err);
-                // Tampilkan pesan error
                 Swal.fire({
                     title: "Gagal!",
                     text: err.response?.data?.message || "Gagal menghapus transaksi.",
@@ -161,30 +153,28 @@ const handleDelete = (id) => {
             }
         }
     });
-};
-
-  const handleEditClick = (transaction) => {
-    setSelectedTransaction(transaction); // Simpan data transaksi yang mau diedit
-    setIsEditModalOpen(true);            // Buka modal
   };
 
-  // Handler Sukses Edit
+  const handleEditClick = (transaction) => {
+    setSelectedTransaction(transaction);
+    setIsEditModalOpen(true);
+  };
+
   const handleEditSuccess = () => {
-    fetchTransactions(); // Refresh tabel
+    fetchTransactions();
   };
 
   const handleAddSuccess = () => {
     fetchTransactions();
   };
 
-  // Handler Sukses Tambah Kategori
   const handleCategorySuccess = () => {
-    // Opsional: Lakukan sesuatu setelah kategori ditambah, misal notif
-    // Tidak perlu fetchTransactions karena list transaksi tidak berubah
+    // Optional logic
   };
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito">
+    // LAYOUT FIX: Gunakan h-screen dan overflow-hidden pada parent utama
+    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
@@ -202,213 +192,251 @@ const handleDelete = (id) => {
           transactionData={selectedTransaction}
       />
 
-      {/* Modal Tambah Kategori */}
       <AddCategoryModal 
           isOpen={isCategoryModalOpen}
           onClose={() => setIsCategoryModalOpen(false)}
           onSuccess={handleCategorySuccess}
       />
 
-      {/* --- CONTAINER UTAMA --- */}
-      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-4 z-10">
-        <div className="h-auto pb-10 flex items-center justify-start flex-col w-full">
-          
-          {/* WRAPPER KONTEN */}
-          <div className="w-full px-6 mt-4">
+      {/* --- CONTENT CONTAINER (SCROLLABLE AREA) --- 
+          Logic:
+          - fixed/absolute: Memastikan area ini terpisah dari scroll browser
+          - top-[5rem]: Memberi ruang untuk Header (asumsi tinggi header 5rem/20 tailwind)
+          - lg:left-[18%]: Memberi ruang untuk Sidebar di Desktop
+          - bottom-0: Mentok ke bawah layar
+          - overflow-y-auto: Mengaktifkan scrollbar HANYA di area ini
+      */}
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+        
+        {/* Wrapper Konten dengan Padding */}
+        <main className="p-4 pb-32 w-full max-w-[1920px] mx-auto space-y-6">
+            
+          {/* HEADER PAGE */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-2">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Daftar Transaksi</h1>
+              <p className="text-gray-500 text-sm mt-1">Kelola dan pantau arus keuanganmu.</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <button 
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition shadow-sm border border-gray-200 text-sm"
+              >
+                <Tag size={18} />
+                Kategori Baru
+              </button>
 
-            {/* HEADER PAGE */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Daftar Transaksi</h1>
-                <p className="text-gray-500 mt-1">Kelola dan pantau arus keuanganmu.</p>
-              </div>
-              
-              <div className="flex gap-3">
-                {/* Tombol Tambah Kategori (Secondary Button) */}
-                <button 
-                  onClick={() => setIsCategoryModalOpen(true)}
-                  className="flex items-center gap-2 px-5 py-3 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition shadow-sm border border-gray-200"
-                >
-                  <Tag size={20} />
-                  Kategori Baru
-                </button>
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200 text-sm"
+              >
+                <Plus size={18} />
+                Tambah Transaksi
+              </button>
+            </div>
+          </div>
 
-                {/* Tombol Tambah Transaksi (Primary Button) */}
-                <button 
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200"
-                >
-                  <Plus size={20} />
-                  Tambah Transaksi
-                </button>
-              </div>
+          {/* FILTER BAR CARD (Sticky saat di-scroll) */}
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col lg:flex-row flex-wrap items-center gap-4 sticky top-0 z-20">
+            
+            {/* Search */}
+            <div className="w-full lg:flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari deskripsi, kategori..." 
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-700 text-sm"
+                value={filters.search}
+                onChange={handleSearchChange}
+              />
             </div>
 
-            {/* FILTER BAR CARD */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap items-center gap-4">
-              
-              {/* Search */}
-              <div className="flex-1 min-w-[200px] relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
-                  placeholder="Cari deskripsi, kategori..." 
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-700"
-                  value={filters.search}
-                  onChange={handleSearchChange}
-                />
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+               {/* Type Filter */}
+               <div className="relative w-full sm:w-auto">
+                  <select 
+                    className="w-full sm:w-40 pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer text-gray-700 font-medium text-sm"
+                    value={filters.type}
+                    onChange={handleTypeChange}
+                  >
+                    <option value="">Semua Tipe</option>
+                    <option value="income">Pemasukan</option>
+                    <option value="expense">Pengeluaran</option>
+                  </select>
+                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
 
-              {/* Type Filter */}
-              <div className="relative">
-                <select 
-                  className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer text-gray-700 font-medium"
-                  value={filters.type}
-                  onChange={handleTypeChange}
-                >
-                  <option value="">Semua Tipe</option>
-                  <option value="income">Pemasukan</option>
-                  <option value="expense">Pengeluaran</option>
-                </select>
-                <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-              </div>
-
-              {/* Date Range */}
-              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                <Calendar size={18} className="text-gray-400" />
-                <input 
-                  type="date" 
-                  name="startDate"
-                  className="bg-transparent focus:outline-none text-sm text-gray-600"
-                  value={filters.startDate}
-                  onChange={handleDateChange}
-                />
-                <span className="text-gray-400">-</span>
-                <input 
-                  type="date" 
-                  name="endDate"
-                  className="bg-transparent focus:outline-none text-sm text-gray-600"
-                  value={filters.endDate}
-                  onChange={handleDateChange}
-                />
-              </div>
+                {/* Date Range */}
+                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 w-full sm:w-auto">
+                  <Calendar size={18} className="text-gray-400 flex-shrink-0" />
+                  <input 
+                    type="date" 
+                    name="startDate"
+                    className="bg-transparent focus:outline-none text-sm text-gray-600 w-full"
+                    value={filters.startDate}
+                    onChange={handleDateChange}
+                  />
+                  <span className="text-gray-400">-</span>
+                  <input 
+                    type="date" 
+                    name="endDate"
+                    className="bg-transparent focus:outline-none text-sm text-gray-600 w-full"
+                    value={filters.endDate}
+                    onChange={handleDateChange}
+                  />
+                </div>
             </div>
+          </div>
 
-            {/* TABLE CARD */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-gray-50/50">
-                    <tr>
-                      <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                      <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori & Akun</th>
-                      <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                      <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Jumlah</th>
-                      <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {loading ? (
-                      <tr>
-                        <td colSpan="5" className="p-8 text-center text-gray-400">Memuat data...</td>
-                      </tr>
-                    ) : transactions.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="p-8 text-center text-gray-400">Tidak ada transaksi ditemukan.</td>
-                      </tr>
-                    ) : (
-                      transactions.map((tx) => (
-                        <tr key={tx.transaction_id} className="hover:bg-gray-50/50 transition">
-                          
-                          {/* Tanggal */}
-                          <td className="p-4 align-top">
-                            <div className="text-sm font-medium text-gray-700">{formatDate(tx.date)}</div>
-                            <div className="text-xs text-gray-400 mt-0.5">
-                              {new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </td>
-
-                          {/* Kategori & Akun */}
-                          <td className="p-4 align-top">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-full ${tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                  {tx.type === 'income' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
-                              </div>
+          {/* --- CONTENT AREA: TABLE (Desktop) vs CARDS (Mobile) --- */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
+            
+            {/* VIEW MOBILE: LIST CARD */}
+            <div className="block lg:hidden">
+               {loading ? (
+                  <div className="p-8 text-center text-gray-400">Memuat data...</div>
+               ) : transactions.length === 0 ? (
+                  <div className="p-8 text-center text-gray-400">Tidak ada transaksi ditemukan.</div>
+               ) : (
+                  <div className="divide-y divide-gray-100">
+                     {transactions.map((tx) => (
+                        <div key={tx.transaction_id} className="p-4 flex flex-col gap-3 hover:bg-gray-50 transition">
+                           {/* Header Card: Tanggal & Amount */}
+                           <div className="flex justify-between items-start">
                               <div>
-                                  <p className="text-sm font-semibold text-gray-800">{tx.category_name || "Tanpa Kategori"}</p>
-                                  <p className="text-xs text-gray-500">{tx.account_name} • {tx.wallet_name}</p>
+                                 <p className="text-sm font-semibold text-gray-800">{formatDate(tx.date)}</p>
+                                 <p className="text-xs text-gray-400">{new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
                               </div>
-                            </div>
-                          </td>
+                              <span className={`text-sm font-bold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                 {tx.type === 'income' ? '+ ' : '- '} {formatRupiah(tx.amount)}
+                              </span>
+                           </div>
 
-                          {/* Deskripsi */}
-                          <td className="p-4 align-top">
-                            <p className="text-sm text-gray-600 line-clamp-2">{tx.description || "-"}</p>
-                          </td>
+                           {/* Body: Kategori, Akun, Deskripsi */}
+                           <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-full mt-1 flex-shrink-0 ${tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                 {tx.type === 'income' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
+                              </div>
+                              <div className="flex-1">
+                                 <p className="text-sm font-medium text-gray-800">{tx.category_name || "Tanpa Kategori"}</p>
+                                 <p className="text-xs text-gray-500 mb-1">{tx.account_name} • {tx.wallet_name}</p>
+                                 {tx.description && (
+                                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded-lg italic">"{tx.description}"</p>
+                                 )}
+                              </div>
+                           </div>
 
-                          {/* Amount */}
-                          <td className="p-4 align-top text-right">
-                            <span className={`text-sm font-bold px-3 py-1 rounded-full ${
-                              tx.type === 'income' 
-                                ? 'bg-green-50 text-green-600' 
-                                : 'bg-red-50 text-red-600'
-                            }`}>
-                              {tx.type === 'income' ? '+ ' : '- '}
-                              {formatRupiah(tx.amount)}
-                            </span>
-                          </td>
-
-                          {/* Action Buttons */}
-                          <td className="p-4 align-top text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <button
-                                onClick={() => handleEditClick(tx)}
-                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
-                                  <Edit size={16} />
+                           {/* Footer: Actions */}
+                           <div className="flex justify-end gap-2 pt-2 border-t border-gray-50">
+                              <button 
+                                 onClick={() => handleEditClick(tx)}
+                                 className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition flex items-center gap-1"
+                              >
+                                 <Edit size={14} /> Edit
                               </button>
                               <button 
-                                  onClick={() => handleDelete(tx.transaction_id)}
-                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" 
-                                  title="Hapus"
+                                 onClick={() => handleDelete(tx.transaction_id)}
+                                 className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition flex items-center gap-1"
                               >
-                                  <Trash2 size={16} />
+                                 <Trash2 size={14} /> Hapus
                               </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* PAGINATION FOOTER */}
-              <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
-                <span className="text-sm text-gray-500">
-                  Menampilkan halaman <span className="font-bold text-gray-800">{pagination.page}</span> dari {pagination.totalPages}
-                </span>
-                
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className="px-4 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1 text-gray-700"
-                  >
-                    <ChevronLeft size={16} /> Prev
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="px-4 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1 text-gray-700"
-                  >
-                    Next <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               )}
             </div>
 
+            {/* VIEW DESKTOP: TABLE */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-gray-50/50 sticky top-0 z-10">
+                  <tr>
+                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori & Akun</th>
+                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Jumlah</th>
+                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {loading ? (
+                    <tr><td colSpan="5" className="p-8 text-center text-gray-400">Memuat data...</td></tr>
+                  ) : transactions.length === 0 ? (
+                    <tr><td colSpan="5" className="p-8 text-center text-gray-400">Tidak ada transaksi ditemukan.</td></tr>
+                  ) : (
+                    transactions.map((tx) => (
+                      <tr key={tx.transaction_id} className="hover:bg-gray-50/50 transition">
+                        <td className="p-4 align-top">
+                          <div className="text-sm font-medium text-gray-700">{formatDate(tx.date)}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </td>
+                        <td className="p-4 align-top">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                {tx.type === 'income' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-gray-800">{tx.category_name || "Tanpa Kategori"}</p>
+                                <p className="text-xs text-gray-500">{tx.account_name} • {tx.wallet_name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 align-top">
+                          <p className="text-sm text-gray-600 line-clamp-2">{tx.description || "-"}</p>
+                        </td>
+                        <td className="p-4 align-top text-right">
+                          <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                            tx.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                          }`}>
+                            {tx.type === 'income' ? '+ ' : '- '} {formatRupiah(tx.amount)}
+                          </span>
+                        </td>
+                        <td className="p-4 align-top text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => handleEditClick(tx)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                              <Edit size={16} />
+                            </button>
+                            <button onClick={() => handleDelete(tx.transaction_id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* PAGINATION FOOTER */}
+            <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30 sticky bottom-0 bg-white z-10">
+              <span className="text-sm text-gray-500 text-center sm:text-left">
+                Halaman <span className="font-bold text-gray-800">{pagination.page}</span> dari {pagination.totalPages}
+              </span>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  className="px-4 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1 text-gray-700"
+                >
+                  <ChevronLeft size={16} /> Prev
+                </button>
+                <button
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page === pagination.totalPages}
+                  className="px-4 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1 text-gray-700"
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

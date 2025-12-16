@@ -57,26 +57,26 @@ function RegisterPage({ onSwitch }) {
 
   return (
     <>
-      <div className="register-box font-gabarito w-[95%] sm:w-[28rem] sm:h-[50rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center">
-        <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[2.5rem]">
+      <div className="register-box font-gabarito w-[95%] sm:w-[23rem] 2xl:w-[28rem] bg-[#ffffff] rounded-[3rem] lg:mr-[3rem] flex flex-col items-center">
+        <h1 className="login-tittle font-gabarito font-bold text-[2rem] mt-[1rem] lg:mt-[0] 2xl:mt-[1rem] 2xl:mt-[2.5rem]">
           Buat Akun
         </h1>
 
-        <p className="text-black font-gabarito pt-[1rem]">
+        <p className="text-black font-gabarito 2xl:pt-[1rem]">
           Ayo Kelola Keuangan anda dengan Easy Budget.
         </p>
 
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
         {/* Nama */}
-        <div className="w-[88%] pt-[2rem] flex flex-col">
+        <div className="w-[88%] pt-[1rem] 2xl:pt-[2rem] flex flex-col">
           <label className="block text-gray-700 font-medium mb-1">Nama</label>
           <input
             type="text"
             placeholder="Masukan Nama"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full mb-4 px-4 py-3 text-black font-gabarito rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="w-full mb-2 2xl:mb-4 px-4 py-3 lg:py-[0.5rem] 2xl:py-3 text-black font-gabarito rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
         </div>
 
@@ -88,7 +88,7 @@ function RegisterPage({ onSwitch }) {
             placeholder="Masukkan Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 mb-4 focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="w-full px-4 py-3 lg:py-[0.5rem] 2xl:py-3 border border-gray-300 rounded-lg text-gray-700 mb-2 2xl:mb-4 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
         </div>
 
@@ -105,7 +105,7 @@ function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Confirm Password */}
-        <div className="w-[88%] flex flex-col mt-4">
+        <div className="w-[88%] flex flex-col mt-2 2xl:mt-4">
           <label className="block text-gray-700 font-medium mb-1">
             Ulangi Kata Sandi
           </label>
@@ -117,7 +117,7 @@ function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Account Type */}
-        <div className="w-[88%] flex flex-col mt-4">
+        <div className="w-[88%] flex flex-col mt-2 2xl:mt-4">
           <label className="block text-gray-700 font-medium mb-1">
             Tipe Akun
           </label>
@@ -125,7 +125,7 @@ function RegisterPage({ onSwitch }) {
           <select
             value={accountType}
             onChange={(e) => setAccountType(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]"
+            className="w-full px-4 py-3 lg:py-[0.5rem] 2xl:py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]"
           >
             <option value="personal">Personal</option>
             <option value="businesses">Businesses</option>
@@ -133,7 +133,7 @@ function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Button Register */}
-        <div className="w-[88%] pt-[3rem]">
+        <div className="w-[88%] pt-[3rem] lg:pt-[1rem] 2xl:pt-[3rem]">
           <button
             type="submit"
             onClick={handleRegister}

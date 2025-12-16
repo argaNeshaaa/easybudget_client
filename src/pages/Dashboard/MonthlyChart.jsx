@@ -42,19 +42,13 @@ export default function MonthlyChart() {
 
         const rawData = res.data.data;
 
-        // 1. Template Bulan (Jan - Des)
         const months = [
           "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
 
-        // 2. Mapping Data
-        // Kita buat array kosong berisi 12 bulan, lalu isi datanya jika ada di API
         const processedData = months.map((monthName, index) => {
-          // MySQL month_index mulai dari 1 (Jan), sedangkan array index mulai dari 0.
-          // Jadi kita cari data dimana month_index == index + 1
           const monthIndexDB = index + 1;
-
           const incomeData = rawData.find(d => d.month_index === monthIndexDB && d.type === 'income');
           const expenseData = rawData.find(d => d.month_index === monthIndexDB && d.type === 'expense');
 
@@ -88,7 +82,8 @@ export default function MonthlyChart() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            // UBAH DISINI: Margin right dikurangi jadi 10, Left 0 agar nempel ke YAxis width
+            margin={{ top: 20, right: 10, left: 0, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
             
@@ -96,15 +91,19 @@ export default function MonthlyChart() {
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#9ca3af', fontSize: 12 }} 
+              // Perkecil font jadi 10/11 agar 12 bulan muat di layar HP
+              tick={{ fill: '#9ca3af', fontSize: 10 }} 
               dy={10}
+              interval={0} // Memaksa semua label bulan muncul (hati-hati jika layar terlalu kecil)
             />
             
             <YAxis 
+              // UBAH DISINI: Fix width 35px agar grafik melebar ke kiri
+              width={35}
               axisLine={false} 
               tickLine={false} 
               tickFormatter={formatYAxis} 
-              tick={{ fill: '#9ca3af', fontSize: 12 }} 
+              tick={{ fill: '#9ca3af', fontSize: 10 }} 
             />
             
             <Tooltip 
@@ -117,25 +116,26 @@ export default function MonthlyChart() {
               verticalAlign="top" 
               align="right" 
               iconType="circle" 
-              wrapperStyle={{ paddingBottom: '20px' }}
+              wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }}
             />
             
-            {/* BATANG PEMASUKAN (HIJAU) */}
+            {/* Batang Pemasukan */}
             <Bar 
               dataKey="Income" 
               name="Pemasukan"
               fill="#22c55e" 
               radius={[4, 4, 0, 0]} 
-              barSize={10} 
+              // Ubah ukuran bar jika perlu, tapi 8-10px biasanya pas untuk 12 bulan
+              barSize={8} 
             />
             
-            {/* BATANG PENGELUARAN (MERAH) */}
+            {/* Batang Pengeluaran */}
             <Bar 
               dataKey="Expense" 
               name="Pengeluaran"
               fill="#ef4444" 
               radius={[4, 4, 0, 0]} 
-              barSize={10} 
+              barSize={8} 
             />
           </BarChart>
         </ResponsiveContainer>

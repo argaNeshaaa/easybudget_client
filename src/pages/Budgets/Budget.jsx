@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
 import AddBudgetModal from "./AddBudgetModal";
-import BudgetCard from "./BudgetCard";
-import { Plus, Edit2, Trash2, X, Save, Loader2, Clock, Calendar, CheckCircle, AlertCircle, Wallet, PieChart, TrendingUp  } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Save, Loader2, Clock, Calendar, CheckCircle } from "lucide-react";
 import api from "../../api/axios";
 import "../../assets/styles/global.css";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
+
 export default function Budget() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State Filter Status (active, upcoming, expired)
+  // State Filter Status
   const [filterStatus, setFilterStatus] = useState("active");
 
   // State Modal
@@ -33,7 +33,6 @@ export default function Budget() {
   const formatRupiah = (num) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(num);
   const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-  // Format Tanggal (dd MMM yyyy)
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
@@ -63,7 +62,6 @@ export default function Budget() {
 
     try {
       setLoading(true);
-      // Panggil API dengan parameter status
       const res = await api.get(`/budgets/users/${userId}`, { 
           headers: { Authorization: `Bearer ${token}` },
           params: { status: filterStatus } 
@@ -77,7 +75,6 @@ export default function Budget() {
     }
   };
 
-  // Fetch ulang saat filter berubah
   useEffect(() => {
     if (token) fetchBudgets();
   }, [token, filterStatus]);
@@ -97,40 +94,31 @@ export default function Budget() {
     }
   };
 
-const handleDelete = (id) => {
+  const handleDelete = (id) => {
     Swal.fire({
         title: "Hapus Budget?",
         text: "Anda yakin ingin menghapus budget ini?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#d33", // Merah untuk tombol hapus
-        cancelButtonColor: "#3085d6", // Biru untuk batal
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
         confirmButtonText: "Ya, Hapus!",
         cancelButtonText: "Batal"
     }).then(async (result) => {
-        // Logika hanya jalan jika user klik tombol "Ya, Hapus!"
         if (result.isConfirmed) {
             try {
-                // Panggil API Delete
                 await api.delete(`/budgets/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-
-                // Tampilkan pesan sukses singkat
                 Swal.fire({
                     title: "Terhapus!",
                     text: "Budget berhasil dihapus.",
                     icon: "success",
-                    timer: 1500, // Hilang sendiri dalam 1.5 detik
+                    timer: 1500,
                     showConfirmButton: false
                 });
-
-                // Refresh data list budget
                 fetchBudgets();
-
             } catch (err) {
-                console.error(err);
-                // Tampilkan pesan error jika gagal
                 Swal.fire({
                     title: "Gagal!",
                     text: err.response?.data?.message || "Gagal menghapus budget.",
@@ -139,42 +127,36 @@ const handleDelete = (id) => {
             }
         }
     });
-};
-
-  const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
-  ];
-  const today = new Date();
-  const currentMonth = monthNames[today.getMonth()];
-  const currentYear = today.getFullYear();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-gabarito">
+    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
-      {/* --- MODAL TAMBAH (Komponen Terpisah) --- */}
+      {/* --- MODAL TAMBAH --- */}
       <AddBudgetModal 
         isOpen={showAdd} 
         onClose={() => setShowAdd(false)} 
         onSuccess={fetchBudgets} 
       />
 
-      {/* --- MODAL EDIT (Inline) --- */}
+      {/* --- MODAL EDIT (Responsive Fix) --- */}
       {editData && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-          <div className="bg-white p-8 w-[28rem] rounded-2xl shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200 px-4">
+          <div className="bg-white p-6 md:p-8 w-full max-w-md rounded-2xl shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Edit Budget</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800">Edit Budget</h2>
                 <button onClick={() => setEditData(null)}><X size={20} className="text-gray-400 hover:text-gray-600"/></button>
             </div>
+            
             <label className="block mb-2 text-gray-600 font-medium text-sm">Kategori</label>
             <input
-              className="w-full p-4 border border-gray-200 rounded-xl mb-5 text-gray-500 bg-gray-50 cursor-not-allowed font-medium"
+              className="w-full p-3 md:p-4 border border-gray-200 rounded-xl mb-5 text-gray-500 bg-gray-50 cursor-not-allowed font-medium text-sm md:text-base"
               value={editData.name}
               disabled readOnly
             />
+            
             <label className="block mb-2 text-gray-600 font-medium text-sm">Batas Bulanan (Rp)</label>
             <div className="mb-8">
               <div className="flex items-center border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 overflow-hidden bg-white transition">
@@ -193,28 +175,32 @@ const handleDelete = (id) => {
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3">
-              <button className="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition" onClick={() => setEditData(null)}>Batal</button>
-              <button className="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2" onClick={handleUpdate}><Save size={18} /> Simpan</button>
+            
+            <div className="flex flex-col-reverse md:flex-row justify-end gap-3">
+              <button className="w-full md:w-auto px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition" onClick={() => setEditData(null)}>Batal</button>
+              <button className="w-full md:w-auto px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2" onClick={handleUpdate}><Save size={18} /> Simpan</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="fixed top-[10%] left-[18%] w-[82%] h-[90%] bg-[#E5E9F1] p-8 overflow-y-auto rounded-lg">
-        <div className="relative bg-white w-full p-8 rounded-2xl shadow-lg min-h-[80vh]">
+      {/* --- MAIN CONTENT CONTAINER (Fluid & Scrollable) --- */}
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+        
+        {/* Wrapper Konten */}
+        <main className="p-4 pt-6 pb-32 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
-          {/* Header Section */}
-          <div className="flex justify-between items-start mb-6">
+          {/* Header Page & Add Button */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Budget Planning</h1>
-              <p className="text-gray-500 text-lg mt-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Budget Planning</h1>
+              <p className="text-gray-500 text-sm md:text-base mt-1">
                 Kelola target pengeluaranmu agar tetap hemat.
               </p>
             </div>
             <button
               onClick={() => setShowAdd(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all font-semibold"
+              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all font-semibold"
             >
               <Plus size={20} />
               Tambah Budget
@@ -222,35 +208,37 @@ const handleDelete = (id) => {
           </div>
 
           {/* FILTER TABS */}
-          <div className="flex gap-2 mb-8 border-b border-gray-200 overflow-x-auto">
-            {[
-                { key: 'active', label: 'Sedang Berjalan', icon: <Clock size={16}/> },
-                { key: 'upcoming', label: 'Akan Datang', icon: <Calendar size={16}/> },
-                { key: 'expired', label: 'Selesai / Lewat', icon: <CheckCircle size={16}/> }
-            ].map(tab => (
-                <button 
-                    key={tab.key}
-                    onClick={() => setFilterStatus(tab.key)}
-                    className={`flex items-center gap-2 px-4 py-2 font-medium text-sm rounded-t-lg transition-all whitespace-nowrap ${
-                        filterStatus === tab.key 
-                        ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" 
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                    }`}
-                >
-                    {tab.icon} {tab.label}
-                </button>
-            ))}
+          <div className="bg-white px-4 pt-2 rounded-2xl shadow-sm border border-gray-100 flex-wrap items-center gap-4 sticky top-0 z-20">
+             <div className="flex gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                {[
+                    { key: 'active', label: 'Sedang Berjalan', icon: <Clock size={16}/> },
+                    { key: 'upcoming', label: 'Akan Datang', icon: <Calendar size={16}/> },
+                    { key: 'expired', label: 'Selesai / Lewat', icon: <CheckCircle size={16}/> }
+                ].map(tab => (
+                    <button 
+                        key={tab.key}
+                        onClick={() => setFilterStatus(tab.key)}
+                        className={`flex items-center gap-2 px-4 py-4 font-medium text-sm transition-all whitespace-nowrap border-b-2 ${
+                            filterStatus === tab.key 
+                            ? "text-blue-600 border-blue-600" 
+                            : "text-gray-500 border-transparent hover:text-gray-700"
+                        }`}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+             </div>
           </div>
 
-          {/* List Budget */}
+          {/* List Budget Grid */}
           {loading ? (
             <div className="text-center py-20 text-gray-400 flex flex-col items-center gap-2">
                 <Loader2 className="animate-spin" size={32}/>
                 Loading budgets...
             </div>
           ) : budgets.length === 0 ? (
-            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 text-lg mb-2">Tidak ada budget dengan status <b>"{filterStatus}"</b>.</p>
+            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 mx-auto w-full">
+                <p className="text-gray-400 text-lg mb-2 px-4">Tidak ada budget dengan status <b>"{filterStatus}"</b>.</p>
                 {filterStatus === 'active' && (
                     <button onClick={() => setShowAdd(true)} className="text-blue-600 font-semibold hover:underline">
                         Buat budget baru sekarang
@@ -258,7 +246,7 @@ const handleDelete = (id) => {
                 )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
               {budgets.map((item) => {
                 const budgetId = item.budget_id;
                 const categoryName = item.category_name;
@@ -267,7 +255,7 @@ const handleDelete = (id) => {
                 
                 const percent = limit > 0 ? Math.round((spent / limit) * 100) : 0;
                 const safePercent = percent > 100 ? 100 : percent; 
-                const barColor = filterStatus === 'upcoming' ? 'bg-blue-200' : getBarColor(percent); // Abu-abu jika belum mulai
+                const barColor = filterStatus === 'upcoming' ? 'bg-blue-200' : getBarColor(percent);
 
                 const catStyle = Object.keys(categoryIcons).find(key => categoryName.includes(key)) 
                                 ? categoryIcons[Object.keys(categoryIcons).find(key => categoryName.includes(key))]
@@ -289,20 +277,21 @@ const handleDelete = (id) => {
                              
                              <button 
                                 onClick={() => handleDelete(budgetId)}
-                                className="p-1.5 text-black hover:text-red-500 hover:bg-red-50 rounded-lg transition opacity-0 group-hover:opacity-100"
+                                // Di mobile, tombol hapus selalu terlihat (opacity-100), di desktop muncul saat hover
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition lg:opacity-0 lg:group-hover:opacity-100"
                                 title="Hapus Budget"
-                            >
+                             >
                                 <Trash2 size={16} />
-                            </button>
+                             </button>
                         </div>
 
                         <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-12 h-12 flex items-center justify-center rounded-full text-xl shadow-inner ${catStyle.color} bg-opacity-90 text-white`}>
+                            <div className={`w-12 h-12 flex items-center justify-center rounded-full text-xl shadow-inner ${catStyle.color} bg-opacity-90 text-white shrink-0`}>
                                 {catStyle.icon}
                             </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-800 line-clamp-1">{categoryName}</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">
+                            <div className="overflow-hidden">
+                                <h2 className="text-lg font-bold text-gray-800 truncate">{categoryName}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5 truncate">
                                     {filterStatus === 'active' ? 'Sedang Berjalan' : filterStatus === 'upcoming' ? 'Akan Datang' : 'Selesai'}
                                 </p>
                             </div>
@@ -326,19 +315,19 @@ const handleDelete = (id) => {
                         <div className="flex justify-between items-end text-sm mt-3 pt-3 border-t border-gray-50">
                             <div>
                                 <p className="text-xs text-gray-400">Terpakai</p>
-                                <p className={`font-semibold ${percent > 100 ? "text-red-600" : "text-gray-800"}`}>{formatRupiah(spent)}</p>
+                                <p className={`font-semibold text-sm sm:text-base ${percent > 100 ? "text-red-600" : "text-gray-800"}`}>{formatRupiah(spent)}</p>
                             </div>
                             <div className="text-right">
                                 <p className="text-xs text-gray-400">Limit</p>
-                                <p className="font-bold text-gray-800">{formatRupiah(limit)}</p>
+                                <p className="font-bold text-sm sm:text-base text-gray-800">{formatRupiah(limit)}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Tombol Edit (Hanya jika belum expired) */}
+                    {/* Tombol Edit */}
                     {filterStatus !== 'expired' && (
                         <button
-                        className="w-full mt-4 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition font-medium border border-gray-100 text-sm flex items-center justify-center gap-2"
+                        className="w-full mt-4 py-2.5 bg-gray-50 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition font-medium border border-gray-100 text-sm flex items-center justify-center gap-2 active:scale-95 duration-200"
                         onClick={() => setEditData({ id: budgetId, name: categoryName, limit: formatNumber(limit) })}
                         >
                         <Edit2 size={14}/> Edit Limit
@@ -349,7 +338,7 @@ const handleDelete = (id) => {
               })}
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

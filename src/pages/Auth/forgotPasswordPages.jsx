@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ArrowLeft, Mail, KeyRound, Lock, CheckCircle, Loader2 } from "lucide-react";
 import api from "../../api/axios";
-import PasswordInput from "../../components/ui/PasswordInput"; // Gunakan komponen passwordmu
+import PasswordInput from "../../components/ui/PasswordInput";
+import toast from "react-hot-toast"; // Opsional: Untuk notifikasi lebih cantik
 
 export default function ForgotPasswordPages({ onBack }) {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
@@ -12,16 +13,26 @@ export default function ForgotPasswordPages({ onBack }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  // Helper untuk menangani error API
+  const handleError = (err, defaultMsg) => {
+    console.error("Error Debug:", err); // Lihat error asli di Console Browser (F12)
+    const msg = err.response?.data?.message || defaultMsg;
+    setError(msg);
+    // toast.error(msg); // Jika pakai react-hot-toast
+  };
+
   // STEP 1: Kirim OTP
   const handleRequestOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
     try {
-      await api.post("/auth/forgot-password", { email });
+      // Trim email untuk menghapus spasi di awal/akhir
+      await api.post("/auth/forgot-password", { email: email.trim() });
       setStep(2);
     } catch (err) {
-      setError(err.response?.data?.message || "Gagal mengirim OTP");
+      handleError(err, "Gagal mengirim OTP. Cek koneksi server.");
     } finally {
       setLoading(false);
     }
@@ -32,11 +43,12 @@ export default function ForgotPasswordPages({ onBack }) {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     try {
-      await api.post("/auth/verify-otp", { email, otp });
+      await api.post("/auth/verify-otp", { email: email.trim(), otp: otp.trim() });
       setStep(3);
     } catch (err) {
-      setError(err.response?.data?.message || "Kode OTP salah");
+      handleError(err, "Kode OTP salah atau kadaluarsa.");
     } finally {
       setLoading(false);
     }
@@ -45,17 +57,29 @@ export default function ForgotPasswordPages({ onBack }) {
   // STEP 3: Reset Password
   const handleResetPassword = async (e) => {
     e.preventDefault();
+    
     if (newPassword !== confirmPassword) {
-        setError("Password tidak cocok");
+        setError("Konfirmasi password tidak cocok.");
         return;
     }
+    
+    if (newPassword.length < 6) {
+        setError("Password minimal 6 karakter.");
+        return;
+    }
+
     setLoading(true);
     setError("");
+
     try {
-      await api.post("/auth/reset-password", { email, otp, newPassword });
+      await api.post("/auth/reset-password", { 
+        email: email.trim(), 
+        otp: otp.trim(), 
+        newPassword 
+      });
       setStep(4); // Success
     } catch (err) {
-      setError(err.response?.data?.message || "Gagal reset password");
+      handleError(err, "Gagal mereset password.");
     } finally {
       setLoading(false);
     }
@@ -67,7 +91,7 @@ export default function ForgotPasswordPages({ onBack }) {
       {/* Tombol Back (Hanya jika belum sukses) */}
       {step < 4 && (
           <button 
-            onClick={step === 1 ? onBack : () => setStep(step - 1)} 
+            onClick={step === 1 ? onBack : () => { setStep(step - 1); setError(""); }} 
             className="absolute top-8 left-8 text-gray-400 hover:text-gray-600 transition"
           >
             <ArrowLeft size={24} />
@@ -99,7 +123,7 @@ export default function ForgotPasswordPages({ onBack }) {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
-                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                {error && <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4">{error}</div>}
                 
                 <button 
                     type="submit" 
@@ -135,7 +159,7 @@ export default function ForgotPasswordPages({ onBack }) {
                           onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                       />
                   </div>
-                  {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                  {error && <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4">{error}</div>}
                   
                   <button 
                       type="submit" 
@@ -144,7 +168,13 @@ export default function ForgotPasswordPages({ onBack }) {
                   >
                       {loading ? <Loader2 className="animate-spin" /> : "Verifikasi"}
                   </button>
-                  <p className="text-sm text-gray-400 mt-4 cursor-pointer hover:text-blue-600" onClick={() => setStep(1)}>Kirim ulang kode?</p>
+                  <button 
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="text-sm text-gray-400 mt-4 cursor-pointer hover:text-blue-600 underline bg-transparent border-none"
+                  >
+                    Kirim ulang kode?
+                  </button>
               </form>
             </>
           )}
@@ -165,8 +195,8 @@ export default function ForgotPasswordPages({ onBack }) {
                       <label className="text-sm font-medium text-gray-700 ml-1">Password Baru</label>
                       <PasswordInput 
                           value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Minimal 8 karakter"
+                          onChange={(e) => setNewPassword(e.target.value)} // Pastikan PasswordInput menghandle event onChange standard
+                          placeholder="Minimal 6 karakter"
                       />
                   </div>
                   <div className="mb-6">
@@ -178,7 +208,7 @@ export default function ForgotPasswordPages({ onBack }) {
                       />
                   </div>
 
-                  {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+                  {error && <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 text-center">{error}</div>}
                   
                   <button 
                       type="submit" 
@@ -203,7 +233,7 @@ export default function ForgotPasswordPages({ onBack }) {
               </p>
               
               <button 
-                  onClick={onBack} // Kembali ke halaman Login
+                  onClick={onBack} 
                   className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-lg"
               >
                   Kembali ke Login

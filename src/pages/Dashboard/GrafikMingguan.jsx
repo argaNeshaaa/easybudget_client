@@ -15,14 +15,14 @@ export default function WeeklyChart() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-  // Helper: Format Rupiah Singkat (misal: 1jt, 500rb) untuk Sumbu Y
+  // Helper: Format Rupiah Singkat
   const formatYAxis = (tickItem) => {
     if (tickItem >= 1000000) return `${(tickItem / 1000000).toFixed(1)}jt`;
     if (tickItem >= 1000) return `${(tickItem / 1000).toFixed(0)}rb`;
     return tickItem;
   };
 
-  // Helper: Format Tooltip (Rupiah Penuh)
+  // Helper: Format Tooltip
   const formatTooltip = (value) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -39,19 +39,15 @@ export default function WeeklyChart() {
         });
         
         const rawData = res.data.data;
-
-        // 1. Siapkan Template Hari (Senin - Minggu)
-        // day_index dari MySQL: 0 = Senin, 6 = Minggu
         const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
         
         const processedData = days.map((day, index) => {
-          // Cari data income untuk hari ke-index
           const incomeData = rawData.find(d => d.day_index === index && d.type === 'income');
-          // Cari data expense untuk hari ke-index
           const expenseData = rawData.find(d => d.day_index === index && d.type === 'expense');
 
           return {
-            name: day,
+            name: day.substring(0, 3), // OPTIONAL: Singkat hari jadi 'Sen', 'Sel' agar muat di mobile
+            fullName: day, // Simpan nama penuh untuk tooltip jika perlu
             Income: incomeData ? Number(incomeData.total) : 0,
             Expense: expenseData ? Number(expenseData.total) : 0,
           };
@@ -74,14 +70,15 @@ export default function WeeklyChart() {
     <div className="w-full h-full">
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-xl font-bold text-gray-800">Grafik Mingguan</h2>
-        <div className="flex gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-green-500"></span>
-            <span className="text-gray-600">Pemasukan</span>
+        {/* Legend */}
+        <div className="flex gap-3 text-xs sm:text-sm">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+            <span className="text-gray-600">Masuk</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-500"></span>
-            <span className="text-gray-600">Pengeluaran</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+            <span className="text-gray-600">Keluar</span>
           </div>
         </div>
       </div>
@@ -90,7 +87,9 @@ export default function WeeklyChart() {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            // UBAH DISINI: Kurangi margin right agar grafik lebih lebar
+            // Left di 0 berarti dia nempel ke YAxis width
+            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
             <defs>
               <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
@@ -103,23 +102,31 @@ export default function WeeklyChart() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+            
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 12 }} 
+              // Perkecil font size agar muat banyak hari
+              tick={{ fill: '#6b7280', fontSize: 11 }} 
               dy={10}
             />
+            
             <YAxis 
+              // UBAH DISINI: Paksa lebar axis jadi kecil (35px)
+              // Ini kunci agar grafik terlihat "Landscape" (melebar ke kiri)
+              width={35}
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 12 }} 
+              tick={{ fill: '#6b7280', fontSize: 11 }} 
               tickFormatter={formatYAxis} 
             />
+            
             <Tooltip 
               formatter={(value) => formatTooltip(value)}
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
             />
+            
             <Area
               type="monotone"
               dataKey="Income"
