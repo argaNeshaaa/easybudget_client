@@ -16,8 +16,6 @@ import OverlayBackground from "./components/ui/OverlayBackground";
 import { useRef, useMemo } from "react";
 import GoogleAuthSuccess from "./routes/AuthSuccess";
 import { Toaster } from "react-hot-toast";
-import { Analytics } from "@vercel/analytics/next";
-import { inject } from "@vercel/analytics";
 function App() {
   const location = useLocation();
   const prevPath = useRef(location.pathname);
