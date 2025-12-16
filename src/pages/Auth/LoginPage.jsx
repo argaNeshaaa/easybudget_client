@@ -20,7 +20,18 @@ function LoginPage({ onSwitch }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const handleLogin = async (e) => {
+
+  useEffect(() => {
+    // Cek apakah ada token di localStorage (Ingat Saya) atau sessionStorage
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    // Jika token ditemukan, jangan biarkan user di halaman login, langsung ke dashboard
+    if (token) {
+      navigate("/dashboard", { replace: true }); // replace: true agar tidak bisa back ke login
+    }
+  }, [navigate]);
+
+const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
@@ -31,18 +42,19 @@ function LoginPage({ onSwitch }) {
         password: password,
       });
 
-      console.log("LOGIN RESPONSE:", res.data);
+      // Ambil token dari response
+      const token = res.data.token;
 
-      // MODIFIKASI BAGIAN INI
-      if (res.data.token) {
+      if (token) {
+        // ✅ LOGIKA PENYIMPANAN
         if (rememberMe) {
-          // Jika "Ingat Saya" dicentang -> Simpan Permanen (LocalStorage)
-          localStorage.setItem("token", res.data.token);
-          sessionStorage.removeItem("token"); // Bersihkan session jika ada sisa
+          // Jika dicentang: Simpan di LocalStorage (Permanen)
+          localStorage.setItem("token", token);
+          sessionStorage.removeItem("token"); 
         } else {
-          // Jika TIDAK dicentang -> Simpan Sementara (SessionStorage)
-          sessionStorage.setItem("token", res.data.token);
-          localStorage.removeItem("token"); // Bersihkan local jika ada sisa
+          // Jika TIDAK dicentang: Simpan di SessionStorage (Sementara)
+          sessionStorage.setItem("token", token);
+          localStorage.removeItem("token"); 
         }
       }
 
@@ -50,16 +62,16 @@ function LoginPage({ onSwitch }) {
         icon: "success",
         title: "Login Berhasil",
         text: "Selamat datang kembali!",
-        showConfirmButton: false, 
-        timer: 2000, 
+        showConfirmButton: false,
+        timer: 1500, // Percepat sedikit agar user tidak menunggu lama
       }).then(() => {
-        navigate("/dashboard");
+        // ✅ Navigasi paksa setelah alert tutup
+        navigate("/dashboard", { replace: true });
       });
+
     } catch (err) {
       console.error(err);
-      setErrorMsg(
-        err.response?.data?.message || "Login gagal, periksa data Anda."
-      );
+      setErrorMsg(err.response?.data?.message || "Login gagal.");
     } finally {
       setLoading(false);
     }
