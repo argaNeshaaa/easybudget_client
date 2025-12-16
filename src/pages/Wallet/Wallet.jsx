@@ -34,7 +34,7 @@ function Wallet() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // ✅ 1. Fetch Data
   const fetchAccounts = async () => {

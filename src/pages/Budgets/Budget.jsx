@@ -18,7 +18,7 @@ export default function Budget() {
   const [showAdd, setShowAdd] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // --- HELPER ---
   const getUserIdFromToken = (token) => {

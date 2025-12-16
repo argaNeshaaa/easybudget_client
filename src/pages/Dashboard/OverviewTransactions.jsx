@@ -11,7 +11,7 @@ export default function OverviewTransactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Tampilkan 5 item per halaman agar tidak perlu scroll panjang
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", {

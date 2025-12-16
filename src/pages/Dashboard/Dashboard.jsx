@@ -26,7 +26,7 @@ function Dashboard() {
   // 1. Cek Profile saat Component Mount
   useEffect(() => {
     const checkProfile = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
       // Jika tidak ada token, paksa logout/login ulang
       if (!token) {
@@ -67,7 +67,7 @@ function Dashboard() {
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem("token"); // Ambil token lagi
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token"); // Ambil token lagi
 
     if (
       !formData.pekerjaan ||

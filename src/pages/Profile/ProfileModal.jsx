@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 export default function ProfileModal({ isOpen, onClose }) {
   const auth = useAuth(); 
   const user_id = auth?.user_id;
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null); 

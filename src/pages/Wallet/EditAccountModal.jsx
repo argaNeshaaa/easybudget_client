@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export default function EditAccountModal({ isOpen, onClose, onSuccess, accountData }) {
   const [loading, setLoading] = useState(false);
   const [wallets, setWallets] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // State Form
   const [formData, setFormData] = useState({

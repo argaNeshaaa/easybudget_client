@@ -13,7 +13,7 @@ import api from "../../api/axios";
 export default function WeeklyChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // Helper: Format Rupiah Singkat
   const formatYAxis = (tickItem) => {

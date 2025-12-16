@@ -6,7 +6,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // State Form Default
   const [formData, setFormData] = useState({

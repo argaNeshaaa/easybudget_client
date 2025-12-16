@@ -57,7 +57,7 @@ export default function Transactions() {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const res = await api.get("/transactions", {
         headers: { Authorization: `Bearer ${token}` },
         params: {
@@ -131,7 +131,7 @@ export default function Transactions() {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const token = localStorage.getItem("token");
+                const token = localStorage.getItem("token") || sessionStorage.getItem("token");
                 await api.delete(`/transactions/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

@@ -15,7 +15,7 @@ import api from "../../api/axios";
 export default function MonthlyChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // Format Sumbu Y (Singkat: 1jt, 500rb)
   const formatYAxis = (tickItem) => {

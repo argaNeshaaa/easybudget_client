@@ -21,7 +21,7 @@ export default function FinancialReports() {
     type: 'expense' 
   });
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // --- HELPERS ---
   const formatRupiah = (num) => {

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export default function EditTransactionModal({ isOpen, onClose, onSuccess, transactionData }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // State Form
   const [formData, setFormData] = useState({

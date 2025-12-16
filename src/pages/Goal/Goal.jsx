@@ -18,7 +18,7 @@ export default function Goals() {
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // --- HELPER ---
   const getUserIdFromToken = (token) => {
@@ -71,7 +71,7 @@ export default function Goals() {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const token = localStorage.getItem("token"); 
+                const token = localStorage.getItem("token") || sessionStorage.getItem("token"); 
                 await api.delete(`/goals/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

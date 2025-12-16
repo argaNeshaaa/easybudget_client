@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Sidebar, Header } from "../../components/ui/Navbar";
 import { Send, Bot, User, Sparkles, Loader2, Trash2 } from "lucide-react";
-import ReactMarkdown from "react-markdown"; 
-import api from "../../api/axios";
+import ReactMarkdown from "react-markdown";
+import { api, aiApi } from "../../api/axios"; 
 import "../../assets/styles/global.css";
 
 export default function AskAI() {
@@ -17,7 +17,7 @@ export default function AskAI() {
   const [loading, setLoading] = useState(false);
   
   const messagesEndRef = useRef(null);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,7 +37,7 @@ export default function AskAI() {
     setLoading(true);
 
     try {
-      const res = await api.post("/ai/chat", { message: userMsg.text }, {
+      const res = await aiApi.post("/ai/chat", { message: userMsg.text }, {
           headers: { Authorization: `Bearer ${token}` }
       });
 

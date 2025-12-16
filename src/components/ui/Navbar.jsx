@@ -189,7 +189,7 @@ export function Header() {
   const location = useLocation();
   const auth = useAuth();
   const [userData, setUserData] = useState(null);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -273,9 +273,19 @@ export function Header() {
             className="w-[2.5rem] h-[2.5rem] sm:w-[3.5rem] sm:h-[3.5rem] cursor-pointer rounded-full overflow-hidden border-2 border-gray-100 hover:border-blue-500 transition shadow-sm"
           >
             <img
-              src={userData?.photo_url || "https://via.placeholder.com/150"}
+              src={
+                userData?.photo_url ||
+                `https://ui-avatars.com/api/?name=${
+                  userData?.name || "User"
+                }&background=random`
+              }
               alt="User"
               className="w-full h-full object-cover"
+              // Tambahkan onError untuk jaga-jaga jika gambar gagal load lagi
+              onError={(e) => {
+                e.target.src =
+                  "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
+              }}
             />
           </button>
 

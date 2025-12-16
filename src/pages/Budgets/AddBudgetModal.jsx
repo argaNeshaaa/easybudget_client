@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export default function AddBudgetModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // Default date setup (Bulan Ini)
   const date = new Date();

@@ -14,7 +14,7 @@ export default function DashboardCards() {
   });
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", {

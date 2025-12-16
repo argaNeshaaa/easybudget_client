@@ -14,7 +14,7 @@ import api from "../../api/axios";
 export default function AccountChart({ accountId }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // Format Rupiah Singkat (Sumbu Y)
   const formatYAxis = (tickItem) => {

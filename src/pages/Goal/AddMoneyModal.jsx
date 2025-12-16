@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export default function AddMoneyModal({ isOpen, onClose, onSuccess, goalData }) {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 

@@ -6,7 +6,7 @@ import "../../assets/styles/global.css";
 export default function Profile() {
     const navigate = useNavigate();
   const { user_id } = useAuth();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const [userData, setUserData] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);

@@ -4,7 +4,7 @@ import api from "../../api/axios";
 import toast from "react-hot-toast";
 export default function AddCategoryModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const [formData, setFormData] = useState({
     name: "",
