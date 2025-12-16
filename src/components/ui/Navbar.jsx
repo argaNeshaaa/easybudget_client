@@ -154,7 +154,7 @@ export function Sidebar() {
                 className="w-[1.5rem] text-white"
               />
               <p className="ml-[1.5rem] text-white text-sm font-medium">
-                Tanya Nathan
+                Tanya Natan
               </p>
             </div>
           </Link>
@@ -399,7 +399,7 @@ export function Header() {
               >
                 <img src={pesanIcon} className="w-5 h-5 mr-3" alt="icon" />
                 <span className="font-medium text-sm sm:text-base">
-                  Tanya Nathan
+                  Tanya Natan
                 </span>
               </Link>
 

@@ -65,7 +65,7 @@ export default function AskAI() {
       setMessages([{
           id: 1,
           sender: "ai",
-          text: "Halo! Saya EasyBudget AI 🤖. Ada yang bisa saya bantu mengenai keuanganmu hari ini?",
+          text: "Halo! Saya Nathan 🤖. Ada yang bisa saya bantu mengenai keuanganmu hari ini?",
       }]);
   };
 
@@ -88,7 +88,7 @@ export default function AskAI() {
                     <Sparkles size={20} />
                 </div>
                 <div>
-                    <h2 className="font-bold text-gray-800 text-base md:text-lg">Tanya Nathan</h2>
+                    <h2 className="font-bold text-gray-800 text-base md:text-lg">Tanya Natan</h2>
                     <p className="text-[10px] md:text-xs text-gray-400 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse"></span>
                         Online • Powered by Gemini
