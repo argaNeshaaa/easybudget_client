@@ -33,37 +33,51 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
   };
 
   // 1. Fetch Data Master (Accounts & Categories) saat Modal Dibuka
-  useEffect(() => {
-    if (isOpen && token) {
-      const fetchData = async () => {
-        const userId = getUserIdFromToken(token);
-        if (!userId) return;
+useEffect(() => {
+  if (isOpen && token) {
+    const fetchData = async () => {
+      const userId = getUserIdFromToken(token);
+      if (!userId) return;
 
-        try {
-          // Panggil 2 API sekaligus (Parallel) agar cepat
-          const [resAccounts, resCategories] = await Promise.all([
-            // Ambil daftar akun (kita pakai endpoint stats karena itu me-return list akun user)
-            api.get("/accounts/summary/stats", { headers: { Authorization: `Bearer ${token}` } }),
-            // Ambil daftar kategori user
-            api.get(`/categories/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
-          ]);
+      try {
+        const results = await Promise.allSettled([
+          api.get("/accounts/summary/stats", { 
+            headers: { Authorization: `Bearer ${token}` } 
+          }),
+          api.get(`/categories/users/${userId}`, { 
+            headers: { Authorization: `Bearer ${token}` } 
+          })
+        ]);
 
-          setAccounts(resAccounts.data.data);
-          setCategories(resCategories.data.data);
+        // --- Handle Accounts ---
+        const resAccounts = results[0];
+        if (resAccounts.status === "fulfilled") {
+          setAccounts(resAccounts.value.data.data);
 
-          // Set default account jika ada
-          if (resAccounts.data.data.length > 0) {
-            setFormData(prev => ({ ...prev, account_id: resAccounts.data.data[0].account_id }));
+          if (resAccounts.value.data.data.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              account_id: resAccounts.value.data.data[0].account_id
+            }));
           }
-
-        } catch (err) {
-          console.error("Gagal load data master:", err);
         }
-      };
-      
-      fetchData();
-    }
-  }, [isOpen, token]);
+
+        // --- Handle Categories ---
+        const resCategories = results[1];
+        if (resCategories.status === "fulfilled") {
+          setCategories(resCategories.value.data.data);
+        } else {
+          setCategories([]);
+        }
+
+      } catch (err) {
+        console.error("Gagal load data:", err);
+      }
+    };
+
+    fetchData();
+  }
+}, [isOpen, token]);
 
   // 2. Filter Kategori berdasarkan Tipe (Income/Expense)
   const filteredCategories = categories.filter(c => c.type === formData.type);
