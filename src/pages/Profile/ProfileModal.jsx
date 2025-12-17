@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Camera, Loader2, User, Briefcase, Wallet, Save, Edit2 } from "lucide-react";
-import api from "../../api/axios";
+import {api, aiApi} from "../../api/axios";
 import useAuth from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -81,7 +81,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       const formData = new FormData();
       formData.append("photo", file); 
 
-      await api.patch(`/users/${user_id}`, formData, {
+      await aiApi.patch(`/users/${user_id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
