@@ -117,7 +117,7 @@ function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Account Type */}
-        <div className="w-[88%] flex flex-col mt-2 2xl:mt-4">
+        {/* <div className="w-[88%] flex flex-col mt-2 2xl:mt-4">
           <label className="block text-gray-700 font-medium mb-1">
             Tipe Akun
           </label>
@@ -130,7 +130,7 @@ function RegisterPage({ onSwitch }) {
             <option value="personal">Personal</option>
             <option value="businesses">Businesses</option>
           </select>
-        </div>
+        </div> */}
 
         {/* Button Register */}
         <div className="w-[88%] pt-[3rem] lg:pt-[1rem] 2xl:pt-[3rem]">
