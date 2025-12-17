@@ -74,7 +74,7 @@ function App() {
             <Route path="/ai" element={<ProtectedRoute><AskAI /></ProtectedRoute>} />
             <Route
               path="/auth/google/success"
-              element={<ProtectedRoute><GoogleAuthSuccess /></ProtectedRoute>}
+              element={<GoogleAuthSuccess />}
             />
             <Route
               path="/profile"
