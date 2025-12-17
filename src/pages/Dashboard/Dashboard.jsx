@@ -130,7 +130,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-background dark:bg-background-dark font-gabarito flex">
+    <div className="min-h-screen transition-colors duration-300 ease-in-out h-screen w-screen bg-background dark:bg-background-dark font-gabarito flex">
       <Sidebar />
       <Header />
 

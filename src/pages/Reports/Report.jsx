@@ -4,7 +4,7 @@ import FinancialReports from "./FinancialReports";
 import "../../assets/styles/global.css";
 function Report() {
   return (
-    <div className="min-h-screen h-screen w-screen font-gabarito">
+    <div className="min-h-screen h-screen w-screen font-gabarito transition-colors duration-300 ease-in-out">
         <Sidebar />
         <Header />
 

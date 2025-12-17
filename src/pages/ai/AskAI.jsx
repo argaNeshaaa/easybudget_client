@@ -170,7 +170,7 @@ export default function AskAI() {
           </div>
 
           {/* INPUT AREA */}
-          <div className="p-3 md:p-4 bg-background-card dark:bg-background-card-dark border-t border-border dark:border-border-dark shrink-0">
+          <div className="p-3 md:p-4 bg-background-card dark:bg-background-card-dark border-t border-border dark:border-border-dark shrink-0 transition-colors duration-300 ease-in-out">
             <form 
                 onSubmit={handleSend}
                 className="flex items-center gap-2 md:gap-3 bg-background-box dark:bg-background-box-dark p-1.5 md:p-2 rounded-full border border-transparent focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition"

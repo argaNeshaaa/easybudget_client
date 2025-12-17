@@ -105,7 +105,7 @@ export default function Goals() {
   const goalCount = goals.length;
 
   return (
-    <div className="h-screen w-screen font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen font-gabarito overflow-hidden flex flex-col transition-colors duration-300 ease-in-out">
       <Sidebar />
       <Header />
 

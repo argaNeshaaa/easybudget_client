@@ -96,7 +96,7 @@ function Wallet() {
 
   return (
     // UBAH LAYOUT: Gunakan h-screen & overflow-hidden pada parent utama
-    <div className="h-screen w-screen bg-background dark:bg-background-dark font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen bg-background dark:bg-background-dark font-gabarito overflow-hidden flex flex-col transition-colors duration-300 ease-in-out">
       <Sidebar />
       <Header />
 
