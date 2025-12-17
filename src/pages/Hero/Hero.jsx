@@ -1,10 +1,12 @@
 import GradientButton from "../../components/ui/GradientButton";
 import "../../assets/styles/global.css";
+import OverlayBackground from "../../components/ui/OverlayBackground";
 function Hero() {
   return (
     <>
-        <div className="z-4 w-full h-full">
-          <div className="z-5 w-full h-[50%] flex items-end justify-center">
+    {<OverlayBackground />}
+        <div className="relative z-10 w-full h-full overflow-hidden">
+          <div className=" w-full h-[50%] flex items-end justify-center">
             <h1 className="tittleHero font-cheese text-[3.5rem] sm:text-[7rem] lg:text-[10rem]">Easy Budget</h1>
           </div>
           <div className="z-5 w-full h-[50%] flex flex-col items-center justify-start">

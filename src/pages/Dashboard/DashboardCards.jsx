@@ -120,7 +120,7 @@ export default function DashboardCards() {
       value: totalTransactions,
       formatted: loading ? "..." : `${totalTransactions}`,
       icon: <ClipboardList size={24} className="text-white" />,
-      subtitle: `${totalTransactions} Transakssi bulan ini`,
+      subtitle: `${totalTransactions} Transaksi bulan ini`,
       iconBg: "bg-gradient-to-r from-purple-400 to-purple-600",
       // Mobile: Full Width (col-span-2), Desktop: 1 col
       gridClass: "col-span-2 sm:col-span-2 lg:col-span-1", 
@@ -134,13 +134,13 @@ export default function DashboardCards() {
         <div
           key={index}
           // Tambahkan item.gridClass untuk mengatur lebar kartu
-          className={`bg-white shadow-md p-4 sm:p-6 rounded-2xl flex justify-between items-start hover:shadow-xl transition-all duration-300 ${item.gridClass}`}
+          className={`bg-background-card dark:bg-background-card-dark shadow-md p-4 sm:p-6 rounded-2xl flex justify-between items-start hover:shadow-xl transition-all duration-300 ${item.gridClass}`}
         >
           <div className="flex flex-col justify-between h-full">
             <div>
-              <p className="text-gray-500 text-xs sm:text-sm font-semibold truncate">{item.title}</p>
+              <p className="text-text-grey dark:text-text-grey-dark text-xs sm:text-sm font-semibold truncate">{item.title}</p>
               {/* Responsive text size: Lebih kecil di HP agar muat */}
-              <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mt-1">{item.formatted}</h2>
+              <h2 className="text-xl sm:text-3xl font-bold text-text-black dark:text-text-white mt-1">{item.formatted}</h2>
             </div>
 
             {item.trendValue ? (

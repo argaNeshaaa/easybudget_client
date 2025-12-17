@@ -96,7 +96,7 @@ function Wallet() {
 
   return (
     // UBAH LAYOUT: Gunakan h-screen & overflow-hidden pada parent utama
-    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen bg-background dark:bg-background-dark font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
@@ -121,20 +121,20 @@ function Wallet() {
          - bottom-0: Mentok ke bawah layar
          - overflow-y-auto: Mengaktifkan scroll
       */}
-      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto z-0">
         {/* Main Content Wrapper */}
         <main className="p-4 pt-6 pb-32 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
           {/* HEADER SECTION: Judul & Tombol Tambah */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-background-card dark:bg-background-card-dark p-6 rounded-2xl shadow-sm">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">My Wallets</h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <h1 className="text-2xl font-bold text-text-black dark:text-text-white">My Wallets</h1>
+              <p className="text-sm text-text-grey dark:text-text-grey-dark mt-1">
                 Kelola semua akun keuangan Anda di sini
               </p>
             </div>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition"
             >
               <Plus size={18} />
               Tambah Akun
@@ -142,7 +142,7 @@ function Wallet() {
           </div>
 
           {/* SECTION 1: ACCOUNT CARD SLIDER & STATS */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6">
+          <div className="bg-background-card dark:bg-background-card-dark rounded-2xl shadow-sm p-4 lg:p-6">
             {accounts.length > 0 ? (
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* --- LEFT: SLIDER KARTU --- */}
@@ -152,7 +152,7 @@ function Wallet() {
                     <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
                       <CreditCard className="text-blue-600 w-5 h-5" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-800 capitalize">
+                    <h2 className="text-xl font-bold text-text-black dark:text-text-white capitalize">
                       {currentAccount?.account_type || "Account"}
                     </h2>
                   </div>
@@ -246,7 +246,7 @@ function Wallet() {
                     <p className="text-gray-400 text-sm font-medium uppercase tracking-wide">
                       Saldo Akun Ini
                     </p>
-                    <p className="text-3xl sm:text-4xl font-bold text-gray-900 mt-1">
+                    <p className="text-3xl sm:text-4xl font-bold text-text-black dark:text-text-white mt-1">
                       {formatRupiah(currentAccount?.balance)}
                     </p>
                   </div>
@@ -316,12 +316,12 @@ function Wallet() {
           {/* SECTION 2: GLOBAL SUMMARY */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Aset */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div className="bg-background-card dark:bg-background-card-dark p-5 rounded-2xl shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-xs font-bold uppercase mb-1">
+                <p className="text-text-grey dark:text-text-grey-dark text-xs font-bold uppercase mb-1">
                   Total Aset Global
                 </p>
-                <p className="text-xl font-bold text-gray-900">
+                <p className="text-xl font-bold text-text-black dark:text-text-white">
                   {formatRupiah(totalGlobalBalance)}
                 </p>
               </div>
@@ -331,12 +331,12 @@ function Wallet() {
             </div>
 
             {/* Jumlah Akun */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div className="bg-background-card dark:bg-background-card-dark p-5 rounded-2xl shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-xs font-bold uppercase mb-1">
+                <p className="text-text-grey dark:text-text-grey-dark text-xs font-bold uppercase mb-1">
                   Jumlah Akun
                 </p>
-                <p className="text-xl font-bold text-gray-900">
+                <p className="text-xl font-bold text-text-black dark:text-text-white">
                   {accounts.length} Akun
                 </p>
               </div>
@@ -346,9 +346,9 @@ function Wallet() {
             </div>
 
             {/* Uang Tunai */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div className="bg-background-card dark:bg-background-card-dark p-5 rounded-2xl shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-xs font-bold uppercase mb-1">
+                <p className="text-text-grey dark:text-text-grey-dark text-xs font-bold uppercase mb-1">
                   Uang Tunai
                 </p>
                 <p className="text-xl font-bold text-green-600">
@@ -367,9 +367,9 @@ function Wallet() {
             </div>
 
             {/* Bank & E-Wallet */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div className="bg-background-card dark:bg-background-card-dark p-5 rounded-2xl shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-xs font-bold uppercase mb-1">
+                <p className="text-text-grey dark:text-text-grey-dark text-xs font-bold uppercase mb-1">
                   Bank & E-Wallet
                 </p>
                 <p className="text-xl font-bold text-sky-600">
@@ -392,10 +392,10 @@ function Wallet() {
           </div>
 
           {/* SECTION 3: CHART */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6 mb-10">
+          <div className="bg-background-card dark:bg-background-card-dark rounded-2xl shadow-sm p-4 lg:p-6 mb-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">
+                <h2 className="text-lg font-bold text-text-black dark:text-text-white">
                   Analisis Transaksi Bulan Ini
                 </h2>
                 <p className="text-sm text-gray-500">

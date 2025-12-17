@@ -6,7 +6,7 @@ function OverlayBackground() {
 
   return (
     <>
-      <div className="layerOverlaya absolute inset-0 scale-105 blur-md z-0"> </div>
+      <div className="layerOverlaya absolute inset-0 scale-105 blur-md bg-pattern"> </div>
 
       <div className="layerOverlayb absolute inset-0 pointer-events-none mix-blend-overlay opacity-25 z-1"></div>
 

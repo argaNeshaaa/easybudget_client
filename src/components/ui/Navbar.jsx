@@ -10,7 +10,8 @@ import reportIcon from "../../assets/icons/report.svg";
 import pesanIcon from "../../assets/icons/message-circle.svg";
 import userIcon from "../../assets/icons/user.svg";
 // Imports dari Library
-import { LogOut, Menu, X } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
+import { LogOut, Menu, X, Sun, Moon, Bell } from "lucide-react";
 import Swal from "sweetalert2";
 import ProfileModal from "../../pages/Profile/ProfileModal";
 import { useLocation, useNavigate, Link } from "react-router-dom";
@@ -189,7 +190,8 @@ export function Header() {
   const location = useLocation();
   const auth = useAuth();
   const [userData, setUserData] = useState(null);
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -256,35 +258,46 @@ export function Header() {
     }
   };
 
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
       {/* HEADER BAR (Z-50: Paling Atas) */}
-      <div className="fixed top-0 left-0 lg:left-[18%] w-full lg:w-[82%] h-[5rem] lg:h-[10%] bg-white z-50 flex items-center justify-between px-4 sm:px-8 shadow-sm border-b border-gray-100">
+      <div className="fixed top-0 left-0 lg:left-[18%] w-full lg:w-[82%] h-[5rem] lg:h-[10%] bg-background-card dark:bg-background-card-dark z-50 flex items-center justify-between px-4 sm:px-8 shadow-sm border-b border-border dark:border-border-dark">
         {/* Title */}
-        <div className="font-gabarito font-bold flex text-xl sm:text-2xl lg:text-[2rem] text-gray-800 truncate">
+        <div className="font-gabarito font-bold flex text-xl sm:text-2xl lg:text-[2rem] text-text-black dark:text-text-white truncate">
           <h1>{currentTitle}</h1>
         </div>
 
         {/* Right Section */}
         <div className="h-full flex items-center gap-3 sm:gap-4">
+
+          {/* === TOMBOL GANTI TEMA (Di sebelah kiri Profil) === */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full w-[3rem] h-[3rem] flex items-center justify-center transition-all duration-300 border border-border dark:border-border-dark bg-background-box dark:bg-background-box-dark hover:bg-gray-200  dark:hover:bg-gray-700 dark:border-gray-700"
+            title={
+              theme === "light" ? "Aktifkan Mode Gelap" : "Aktifkan Mode Terang"
+            }
+          >
+            {theme === "light" ? <Moon size={24} /> : <Sun size={24} />}
+          </button>
           {/* Profile Button */}
           <button
             onClick={() => setIsProfileOpen(true)}
-            className="w-[2.5rem] h-[2.5rem] sm:w-[3.5rem] sm:h-[3.5rem] cursor-pointer rounded-full overflow-hidden border-2 border-gray-100 hover:border-blue-500 transition shadow-sm"
+            className="w-[2.5rem] h-[2.5rem] sm:w-[3rem] sm:h-[3rem] cursor-pointer rounded-full overflow-hidden border-2 border-border dark:border-border-dark hover:border-blue-500 transition shadow-sm"
           >
             <img
               src={
                 userData?.photo_url ||
-                `https://ui-avatars.com/api/?name=${
-                  userData?.name || "User"
-                }&background=random`
+                `https://res.cloudinary.com/dsnkkhvfi/image/upload/v1764674234/users/l6b25bweokverv50rnho.png`
               }
               alt="User"
               className="w-full h-full object-cover"
               // Tambahkan onError untuk jaga-jaga jika gambar gagal load lagi
               onError={(e) => {
                 e.target.src =
-                  "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
+                  "https://res.cloudinary.com/dsnkkhvfi/image/upload/v1764674234/users/l6b25bweokverv50rnho.png";
               }}
             />
           </button>

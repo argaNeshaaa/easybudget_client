@@ -9,14 +9,16 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
+import { useTheme } from "../../context/ThemeContext";
 import api from "../../api/axios";
 
 export default function MonthlyChart() {
+  const { theme } = useTheme();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
+  const axisColor = theme === "dark" ? "#9CA3AF" : "#6B7280";
+  const gridlineColor = theme === "dark" ? "#e5e7eb" : "#6B7280";
   // Format Sumbu Y (Singkat: 1jt, 500rb)
   const formatYAxis = (tickItem) => {
     if (tickItem >= 1000000) return `${(tickItem / 1000000).toFixed(0)}jt`;
@@ -75,7 +77,7 @@ export default function MonthlyChart() {
   return (
     <div className="w-full h-full">
       <div className="mb-4 px-2">
-        <h2 className="text-xl font-bold text-gray-800">Statistik Tahunan</h2>
+        <h2 className="text-xl font-bold text-text-black dark:text-text-white">Statistik Tahunan</h2>
       </div>
 
       <div className="h-[22rem] w-full">
@@ -85,14 +87,14 @@ export default function MonthlyChart() {
             // UBAH DISINI: Margin right dikurangi jadi 10, Left 0 agar nempel ke YAxis width
             margin={{ top: 20, right: 10, left: 0, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridlineColor} />
             
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
               // Perkecil font jadi 10/11 agar 12 bulan muat di layar HP
-              tick={{ fill: '#9ca3af', fontSize: 10 }} 
+              tick={{ fill: axisColor, fontSize: 10 }} 
               dy={10}
               interval={0} // Memaksa semua label bulan muncul (hati-hati jika layar terlalu kecil)
             />
@@ -103,7 +105,7 @@ export default function MonthlyChart() {
               axisLine={false} 
               tickLine={false} 
               tickFormatter={formatYAxis} 
-              tick={{ fill: '#9ca3af', fontSize: 10 }} 
+              tick={{ fill: axisColor, fontSize: 10 }} 
             />
             
             <Tooltip 

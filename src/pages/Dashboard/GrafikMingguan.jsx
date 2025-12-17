@@ -9,11 +9,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../api/axios";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function WeeklyChart() {
+  const { theme } = useTheme();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+
+  const axisColor = theme === "dark" ? "#9CA3AF" : "#6B7280";
+  const gridlineColor = theme === "dark" ? "#e5e7eb" : "#6B7280";
 
   // Helper: Format Rupiah Singkat
   const formatYAxis = (tickItem) => {
@@ -69,16 +75,16 @@ export default function WeeklyChart() {
   return (
     <div className="w-full h-full">
       <div className="flex items-center justify-between mb-4 px-2">
-        <h2 className="text-xl font-bold text-gray-800">Grafik Mingguan</h2>
+        <h2 className="text-xl font-bold text-text-black dark:text-text-white">Grafik Mingguan</h2>
         {/* Legend */}
         <div className="flex gap-3 text-xs sm:text-sm">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-            <span className="text-gray-600">Masuk</span>
+            <span className="text-text-grey dark:text-text-grey-dark">Masuk</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-            <span className="text-gray-600">Keluar</span>
+            <span className="text-text-grey dark:text-text-grey-dark">Keluar</span>
           </div>
         </div>
       </div>
@@ -101,14 +107,14 @@ export default function WeeklyChart() {
                 <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridlineColor} />
             
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
               // Perkecil font size agar muat banyak hari
-              tick={{ fill: '#6b7280', fontSize: 11 }} 
+              tick={{ fill: axisColor, fontSize: 11 }} 
               dy={10}
             />
             
@@ -118,7 +124,7 @@ export default function WeeklyChart() {
               width={35}
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 11 }} 
+              tick={{ fill: axisColor, fontSize: 11 }} 
               tickFormatter={formatYAxis} 
             />
             

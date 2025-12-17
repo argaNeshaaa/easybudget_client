@@ -185,16 +185,16 @@ export default function Budget() {
       )}
 
       {/* --- MAIN CONTENT CONTAINER (Fluid & Scrollable) --- */}
-      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-background dark:bg-background-dark z-0">
         
         {/* Wrapper Konten */}
         <main className="p-4 pt-6 pb-32 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
           {/* Header Page & Add Button */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-background-card dark:bg-background-card-dark p-6 rounded-2xl shadow-sm border border-border dark:border-border-dark">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Budget Planning</h1>
-              <p className="text-gray-500 text-sm md:text-base mt-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-text-black dark:text-text-white">Budget Planning</h1>
+              <p className="text-text-grey dark:text-text-grey-dark text-sm md:text-base mt-1">
                 Kelola target pengeluaranmu agar tetap hemat.
               </p>
             </div>
@@ -208,7 +208,7 @@ export default function Budget() {
           </div>
 
           {/* FILTER TABS */}
-          <div className="bg-white px-4 pt-2 rounded-2xl shadow-sm border border-gray-100 flex-wrap items-center gap-4 sticky top-0 z-20">
+          <div className="bg-background-card dark:bg-background-card-dark px-4 pt-2 rounded-2xl shadow-sm border border-border dark:border-border-dark flex-wrap items-center gap-4 top-0 z-20">
              <div className="flex gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
                 {[
                     { key: 'active', label: 'Sedang Berjalan', icon: <Clock size={16}/> },
@@ -221,7 +221,7 @@ export default function Budget() {
                         className={`flex items-center gap-2 px-4 py-4 font-medium text-sm transition-all whitespace-nowrap border-b-2 ${
                             filterStatus === tab.key 
                             ? "text-blue-600 border-blue-600" 
-                            : "text-gray-500 border-transparent hover:text-gray-700"
+                            : "text-text-black dark:text-text-white border-transparent hover:text-[#bcaff0]"
                         }`}
                     >
                         {tab.icon} {tab.label}
@@ -237,7 +237,7 @@ export default function Budget() {
                 Loading budgets...
             </div>
           ) : budgets.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 mx-auto w-full">
+            <div className="text-center py-20 bg-background-card dark:bg-background-card-dark rounded-2xl border-2 border-dashed border-border dark:border-border-dark mx-auto w-full">
                 <p className="text-gray-400 text-lg mb-2 px-4">Tidak ada budget dengan status <b>"{filterStatus}"</b>.</p>
                 {filterStatus === 'active' && (
                     <button onClick={() => setShowAdd(true)} className="text-blue-600 font-semibold hover:underline">
@@ -264,13 +264,13 @@ export default function Budget() {
                 return (
                   <div
                     key={budgetId}
-                    className={`p-5 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all bg-white flex flex-col justify-between group relative ${filterStatus === 'expired' ? 'opacity-75 grayscale-[0.3]' : ''}`}
+                    className={`p-5 border border-border dark:border-border-dark rounded-2xl shadow-sm hover:shadow-md transition-all bg-background-card dark:bg-background-card-dark flex flex-col justify-between group relative ${filterStatus === 'expired' ? 'opacity-75 grayscale-[0.3]' : ''}`}
                   >
                     <div>
                         {/* Header Kartu */}
                         <div className="flex justify-between items-start mb-4">
                              {/* Badge Tanggal */}
-                             <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">
+                             <div className="flex items-center gap-1.5 text-xs font-medium text-text-grey dark:text-text-grey-dark bg-background-box dark:bg-background-box-dark px-2.5 py-1 rounded-md">
                                 <Calendar size={12} />
                                 <span>{formatDate(item.period_start)} - {formatDate(item.period_end)}</span>
                              </div>
@@ -290,7 +290,7 @@ export default function Budget() {
                                 {catStyle.icon}
                             </div>
                             <div className="overflow-hidden">
-                                <h2 className="text-lg font-bold text-gray-800 truncate">{categoryName}</h2>
+                                <h2 className="text-lg font-bold text-text-black dark:text-text-white truncate">{categoryName}</h2>
                                 <p className="text-xs text-gray-400 mt-0.5 truncate">
                                     {filterStatus === 'active' ? 'Sedang Berjalan' : filterStatus === 'upcoming' ? 'Akan Datang' : 'Selesai'}
                                 </p>
@@ -300,7 +300,7 @@ export default function Budget() {
                         {/* Progress Bar */}
                         <div className="mb-2">
                             <div className="flex justify-between text-sm mb-1">
-                                <span className={`font-bold ${percent > 100 ? 'text-red-600' : 'text-gray-700'}`}>{percent}%</span>
+                                <span className={`font-bold ${percent > 100 ? 'text-red-600' : 'text-text-grey dark:text-text-grey-dark'}`}>{percent}%</span>
                                 <span className="text-gray-400 text-xs">Terpakai</span>
                             </div>
                             <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
@@ -315,11 +315,11 @@ export default function Budget() {
                         <div className="flex justify-between items-end text-sm mt-3 pt-3 border-t border-gray-50">
                             <div>
                                 <p className="text-xs text-gray-400">Terpakai</p>
-                                <p className={`font-semibold text-sm sm:text-base ${percent > 100 ? "text-red-600" : "text-gray-800"}`}>{formatRupiah(spent)}</p>
+                                <p className={`font-semibold text-sm sm:text-base ${percent > 100 ? "text-red-600" : "text-text-black dark:text-text-white"}`}>{formatRupiah(spent)}</p>
                             </div>
                             <div className="text-right">
                                 <p className="text-xs text-gray-400">Limit</p>
-                                <p className="font-bold text-sm sm:text-base text-gray-800">{formatRupiah(limit)}</p>
+                                <p className="font-bold text-sm sm:text-base text-text-black dark:text-text-white">{formatRupiah(limit)}</p>
                             </div>
                         </div>
                     </div>
@@ -327,7 +327,7 @@ export default function Budget() {
                     {/* Tombol Edit */}
                     {filterStatus !== 'expired' && (
                         <button
-                        className="w-full mt-4 py-2.5 bg-gray-50 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition font-medium border border-gray-100 text-sm flex items-center justify-center gap-2 active:scale-95 duration-200"
+                        className="w-full mt-4 py-2.5 bg-background-box dark:bg-background-box-dark text-text-black dark:text-text-white rounded-xl hover:bg-blue-50 hover:text-blue-600 transition font-medium border border-border dark:border-border-dark text-sm flex items-center justify-center gap-2 active:scale-95 duration-200"
                         onClick={() => setEditData({ id: budgetId, name: categoryName, limit: formatNumber(limit) })}
                         >
                         <Edit2 size={14}/> Edit Limit

@@ -105,25 +105,25 @@ export default function Goals() {
   const goalCount = goals.length;
 
   return (
-    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
       {/* --- CONTENT CONTAINER (Scrollable) --- */}
-      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-background dark:bg-background-dark z-0">
         
         {/* Wrapper Konten */}
         <main className="p-4 pt-6 pb-32 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
             
           {/* Header Page & Button */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-background-card dark:bg-background-card-dark p-6 rounded-2xl shadow-sm border border-border dark:border-border-dark">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Financial Goals</h1>
-              <p className="text-gray-500 text-sm md:text-base mt-1">Wujudkan impianmu dengan menabung secara teratur.</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-text-black dark:text-text-white">Financial Goals</h1>
+              <p className="text-text-grey dark:text-text-grey-dark text-sm md:text-base mt-1">Wujudkan impianmu dengan menabung secara teratur.</p>
             </div>
             <button 
               onClick={() => setIsAddOpen(true)}
-              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg"
             >
               <Plus size={20} />
               Target Baru
@@ -131,14 +131,14 @@ export default function Goals() {
           </div>
 
           {/* SUMMARY CARD (Responsive Grid) */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+          <div className="bg-background-card dark:bg-background-card-dark p-6 rounded-2xl shadow-sm border border-border dark:border-border-dark grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
             
             {/* Item 1 */}
             <div className="flex items-center gap-4 sm:pr-4 pt-4 sm:pt-0 first:pt-0">
               <div className="p-3 bg-blue-100 rounded-full text-blue-600 shrink-0"><Target size={24} /></div>
               <div>
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">Total Target Dana</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-800 truncate">{formatRupiah(totalTarget)}</p>
+                <p className="text-xs sm:text-sm text-text-grey dark:text-text-grey-dark mb-1">Total Target Dana</p>
+                <p className="text-lg sm:text-xl font-bold text-text-black dark:text-text-white truncate">{formatRupiah(totalTarget)}</p>
               </div>
             </div>
 
@@ -146,8 +146,8 @@ export default function Goals() {
             <div className="flex items-center gap-4 sm:px-4 pt-4 sm:pt-0">
               <div className="p-3 bg-green-100 rounded-full text-green-600 shrink-0"><Coins size={24} /></div>
               <div>
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">Sudah Terkumpul</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-800 truncate">{formatRupiah(totalSaved)}</p>
+                <p className="text-xs sm:text-sm text-text-grey dark:text-text-grey-dark mb-1">Sudah Terkumpul</p>
+                <p className="text-lg sm:text-xl font-bold text-text-black dark:text-text-white truncate">{formatRupiah(totalSaved)}</p>
               </div>
             </div>
 
@@ -155,14 +155,14 @@ export default function Goals() {
             <div className="flex items-center gap-4 sm:pl-4 pt-4 sm:pt-0">
               <div className="p-3 bg-yellow-100 rounded-full text-yellow-600 shrink-0"><Trophy size={24} /></div>
               <div>
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">Jumlah Goals</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-800">{goalCount}</p>
+                <p className="text-xs sm:text-sm text-text-grey dark:text-text-grey-dark mb-1">Jumlah Goals</p>
+                <p className="text-lg sm:text-xl font-bold text-text-black dark:text-text-white">{goalCount}</p>
               </div>
             </div>
           </div>
 
           {/* --- FILTER TABS --- */}
-          <div className="bg-white px-4 pt-2 rounded-2xl shadow-sm border border-gray-100 flex-wrap items-center gap-4 sticky top-0 z-20">
+          <div className="bg-background-card dark:bg-background-card-dark px-4 pt-2 rounded-2xl shadow-sm border border-border dark:border-border-dark flex-wrap items-center gap-4 top-0 z-20">
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
               {[
                   { key: 'all', label: 'Semua', icon: <Target size={16}/> },
@@ -176,7 +176,7 @@ export default function Goals() {
                       className={`flex items-center gap-2 px-4 py-4 font-medium text-sm transition-all whitespace-nowrap border-b-2 ${
                           filterStatus === tab.key 
                           ? "text-blue-600 border-blue-600" 
-                          : "text-gray-500 border-transparent hover:text-gray-700"
+                          : "text-text-black dark:text-text-white border-transparent hover:text-[#bcaff0]"
                       }`}
                   >
                       {tab.icon} {tab.label}
@@ -192,8 +192,8 @@ export default function Goals() {
                 Loading...
             </div>
           ) : goals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-              <p className="text-gray-400 mb-4 text-lg text-center px-4">Tidak ada goal dengan status <b>"{filterStatus}"</b>.</p>
+            <div className="flex flex-col items-center justify-center py-20 bg-background dark:bg-background-dark rounded-2xl border-2 border-dashed border-border dark:border-border-dark">
+              <p className="text-text-grey dark:text-text-grey-dark mb-4 text-lg text-center px-4">Tidak ada goal dengan status <b>"{filterStatus}"</b>.</p>
               {filterStatus === 'all' && (
                   <button onClick={() => setIsAddOpen(true)} className="text-blue-600 font-semibold hover:underline">Buat sekarang</button>
               )}

@@ -16,6 +16,8 @@ import OverlayBackground from "./components/ui/OverlayBackground";
 import { useRef, useMemo } from "react";
 import GoogleAuthSuccess from "./routes/AuthSuccess";
 import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./components/ui/ProtectedRoute";
+
 function App() {
   const location = useLocation();
   const prevPath = useRef(location.pathname);
@@ -40,7 +42,7 @@ function App() {
     <div className="overflow-hidden w-screen h-screen relative">
       <Toaster position="top-center" reverseOrder={false} />
       {/* background / particle tetap di belakang */}
-      {showOverlay && <OverlayBackground />}
+      {showOverlay}
 
       {/* wrapper untuk konten yang akan di-slide */}
       <div className="absolute inset-0 z-20">
@@ -62,22 +64,22 @@ function App() {
                 </PageTransition>
               }
             />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/wallet" element={<Wallet />} />
-            <Route path="/transaction" element={<Transaction />} />
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/goal" element={<Goal />} />
-            <Route path="/report" element={<Report />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/transaction" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
+            <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
+            <Route path="/goal" element={<ProtectedRoute><Goal /></ProtectedRoute>} />
+            <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
 
-            <Route path="/ai" element={<AskAI />} />
+            <Route path="/ai" element={<ProtectedRoute><AskAI /></ProtectedRoute>} />
             <Route
               path="/auth/google/success"
-              element={<GoogleAuthSuccess />}
+              element={<ProtectedRoute><GoogleAuthSuccess /></ProtectedRoute>}
             />
             <Route
               path="/profile"
-              element={
-                  <Profile />
+              element={<ProtectedRoute><Profile /></ProtectedRoute>
+                  
               }
             />
           </Routes>

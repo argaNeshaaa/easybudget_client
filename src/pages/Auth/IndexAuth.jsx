@@ -1,13 +1,15 @@
 import { useState } from "react";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
+import OverlayBackground from "../../components/ui/OverlayBackground";
 
 function IndexAuth() {
   const [activeForm, setActiveForm] = useState("login");
 
   return (
     <div className="login relative h-screen w-screen flex justify-center items-center overflow-hidden text-white ">
-      <div className="relative w-full h-full flex items-center justify-center">
+      <OverlayBackground />
+      <div className="relative z-10 w-full h-full flex items-center justify-center">
         <div
           className={` absolute lg:w-[50%] w-full justify-center lg:relative h-full flex items-center lg:justify-end transition-all duration-700 ${
             activeForm === "register"

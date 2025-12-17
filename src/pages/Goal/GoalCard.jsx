@@ -45,7 +45,7 @@ export default function GoalCard({ goal, onDelete, onAddMoney }) {
   const formatDate = (date) => new Date(date).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all relative group flex flex-col justify-between h-full ${current >= target ? 'border-green-200 bg-green-50/30' : ''}`}>
+    <div className={`bg-background-card dark:bg-background-card-dark p-5 rounded-2xl shadow-sm border border-border dark:border-border-dark hover:shadow-md transition-all relative group flex flex-col justify-between h-full ${current >= target ? 'border-green-200' : ''}`}>
       
       <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button 
@@ -61,8 +61,8 @@ export default function GoalCard({ goal, onDelete, onAddMoney }) {
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
              <div className="flex flex-col">
-                <h3 className="font-bold text-gray-800 text-lg line-clamp-1" title={goal.name}>{goal.name}</h3>
-                <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                <h3 className="font-bold text-text-black dark:text-text-white text-lg line-clamp-1" title={goal.name}>{goal.name}</h3>
+                <div className="flex items-center gap-1 text-xs text-text-grey dark:text-text-grey-dark mt-1">
                     <Calendar size={12} />
                     <span>Deadline: {formatDate(goal.deadline)}</span>
                 </div>
@@ -73,7 +73,7 @@ export default function GoalCard({ goal, onDelete, onAddMoney }) {
         {/* Progress Bar */}
         <div className="mb-1 flex justify-between items-end">
              <span className={`text-2xl font-bold ${statusText}`}>{Math.round(percentage)}%</span>
-             <span className="text-xs text-gray-500 mb-1">Terkumpul</span>
+             <span className="text-xs text-text-grey dark:text-text-grey-dark mb-1">Terkumpul</span>
         </div>
         <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-3">
             <div 
@@ -86,11 +86,11 @@ export default function GoalCard({ goal, onDelete, onAddMoney }) {
         <div className="flex justify-between text-sm mb-4 pt-3 border-t border-gray-50">
             <div>
                 <p className="text-xs text-gray-400">Saat Ini</p>
-                <p className="font-semibold text-gray-800">{formatRp(current)}</p>
+                <p className="font-semibold text-text-black dark:text-text-white">{formatRp(current)}</p>
             </div>
             <div className="text-right">
                 <p className="text-xs text-gray-400">Target</p>
-                <p className="font-bold text-gray-800">{formatRp(target)}</p>
+                <p className="font-bold text-text-black dark:text-text-white">{formatRp(target)}</p>
             </div>
         </div>
       </div>

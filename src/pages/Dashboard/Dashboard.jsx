@@ -130,11 +130,11 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-gray-100 font-gabarito flex">
+    <div className="min-h-screen h-screen w-screen bg-background dark:bg-background-dark font-gabarito flex">
       <Sidebar />
       <Header />
 
-      <div className="fixed top-[4rem] lg:top-[10%] left-0 lg:left-[18%] w-full lg:w-[82%] h-[90%] bg-[#E5E9F1] overflow-y-auto p-4 z-10">
+      <div className="fixed top-[4rem] lg:top-[10%] left-0 lg:left-[18%] w-full lg:w-[82%] h-[90%] overflow-y-auto p-4 z-10">
         <div className="h-max text-white flex items-center justify-start flex-col">
           {/* BAGIAN ATAS - DASHBOARD CARDS */}
           <div className="w-full h-max flex flex-between items-center justify-between mt-[1rem] mb-[1rem]">
@@ -142,18 +142,18 @@ function Dashboard() {
           </div>
 
           <div className="w-full h-max flex flex-wrap 2xl:flex-nowrap flex-between items-center justify-between mt-[1rem] mb-[1rem] gap-6">
-            <div className="dashboard-card w-full 2xl:w-[50%] h-[30rem] bg-[#ffffff] lg:ml-[1rem] lg:mr-[1rem] 2xl:mr-[0] p-6 rounded-xl flex flex-col items-center justify-center text-gray-500 ">
+            <div className="dashboard-card w-full 2xl:w-[50%] h-[30rem] bg-background-card dark:bg-background-card-dark lg:ml-[1rem] lg:mr-[1rem] 2xl:mr-[0] p-6 rounded-xl flex flex-col items-center justify-center text-gray-500 ">
               <WeeklyChart />
             </div>
 
-            <div className="dashboard-card w-full 2xl:w-[50%] h-[30rem] bg-[#ffffff] lg:mr-[1rem] lg:ml-[1rem] 2xl:ml-0 p-6 rounded-xl shadow-md flex flex-col items-center justify-center text-gray-500">
+            <div className="dashboard-card w-full 2xl:w-[50%] h-[30rem] bg-background-card dark:bg-background-card-dark lg:mr-[1rem] lg:ml-[1rem] 2xl:ml-0 p-6 rounded-xl shadow-md flex flex-col items-center justify-center text-gray-500">
               <MonthlyChart />
             </div>
           </div>
 
           {/* BAGIAN BAWAH - OVERVIEW */}
           <div className="w-full h-max flex flex-between items-center justify-center mt-[1rem] mb-[1rem]">
-            <div className="dashboard-card w-full h-[30rem] bg-[#ffffff] lg:ml-[1rem] lg:mr-[1rem] p-6 rounded-xl shadow-md">
+            <div className="dashboard-card w-full h-[30rem] bg-background-card dark:bg-background-card-dark lg:ml-[1rem] lg:mr-[1rem] p-6 rounded-xl shadow-md">
               <OverviewTransactions />
             </div>
           </div>

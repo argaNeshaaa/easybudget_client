@@ -174,7 +174,7 @@ export default function Transactions() {
 
   return (
     // LAYOUT FIX: Gunakan h-screen dan overflow-hidden pada parent utama
-    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen bg-background dark:bg-background-dark font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
@@ -206,16 +206,14 @@ export default function Transactions() {
           - bottom-0: Mentok ke bawah layar
           - overflow-y-auto: Mengaktifkan scrollbar HANYA di area ini
       */}
-      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto bg-[#F3F4F6] z-0">
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 overflow-y-auto z-0">
         
         {/* Wrapper Konten dengan Padding */}
         <main className="p-4 pb-32 w-full max-w-[1920px] mx-auto space-y-6">
             
           {/* HEADER PAGE */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-2">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Daftar Transaksi</h1>
-              <p className="text-gray-500 text-sm mt-1">Kelola dan pantau arus keuanganmu.</p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -229,7 +227,7 @@ export default function Transactions() {
 
               <button 
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200 text-sm"
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg text-sm"
               >
                 <Plus size={18} />
                 Tambah Transaksi
@@ -238,7 +236,7 @@ export default function Transactions() {
           </div>
 
           {/* FILTER BAR CARD (Sticky saat di-scroll) */}
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col lg:flex-row flex-wrap items-center gap-4 sticky top-0 z-20">
+          <div className="bg-background-card dark:bg-background-card-dark p-4 rounded-xl shadow-sm flex flex-col lg:flex-row flex-wrap items-center gap-4 top-0 z-20">
             
             {/* Search */}
             <div className="w-full lg:flex-1 relative">
@@ -246,7 +244,7 @@ export default function Transactions() {
               <input 
                 type="text" 
                 placeholder="Cari deskripsi, kategori..." 
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-700 text-sm"
+                className="w-full pl-10 pr-4 py-3 bg-background-box dark:bg-background-box-dark border border-border dark:border-border-dark rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-text-grey dark:text-text-grey-dark text-sm"
                 value={filters.search}
                 onChange={handleSearchChange}
               />
@@ -256,7 +254,7 @@ export default function Transactions() {
                {/* Type Filter */}
                <div className="relative w-full sm:w-auto">
                   <select 
-                    className="w-full sm:w-40 pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer text-gray-700 font-medium text-sm"
+                    className="w-full sm:w-40 pl-4 pr-10 py-3 bg-background-box dark:bg-background-box-dark border border-border dark:border-border-dark rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500  transition appearance-none cursor-pointer text-text-grey dark:text-text-grey-dark font-medium text-sm"
                     value={filters.type}
                     onChange={handleTypeChange}
                   >
@@ -264,24 +262,24 @@ export default function Transactions() {
                     <option value="income">Pemasukan</option>
                     <option value="expense">Pengeluaran</option>
                   </select>
-                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-text-grey dark:text-text-grey-dark pointer-events-none" size={16} />
                 </div>
 
                 {/* Date Range */}
-                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 w-full sm:w-auto">
-                  <Calendar size={18} className="text-gray-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 bg-background-box dark:bg-background-box-dark transition border border-border dark:border-border-dark rounded-xl px-3 py-2 w-full sm:w-auto">
+                  <Calendar size={18} className="text-text-grey dark:text-text-grey-dark flex-shrink-0" />
                   <input 
                     type="date" 
                     name="startDate"
-                    className="bg-transparent focus:outline-none text-sm text-gray-600 w-full"
+                    className="bg-transparent focus:outline-none text-sm text-text-grey dark:text-text-grey-dark w-full"
                     value={filters.startDate}
                     onChange={handleDateChange}
                   />
-                  <span className="text-gray-400">-</span>
+                  <span className="text-text-grey dark:text-text-grey-dark">-</span>
                   <input 
                     type="date" 
                     name="endDate"
-                    className="bg-transparent focus:outline-none text-sm text-gray-600 w-full"
+                    className="bg-transparent focus:outline-none text-sm text-text-grey dark:text-text-grey-dark w-full"
                     value={filters.endDate}
                     onChange={handleDateChange}
                   />
@@ -290,7 +288,7 @@ export default function Transactions() {
           </div>
 
           {/* --- CONTENT AREA: TABLE (Desktop) vs CARDS (Mobile) --- */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
+          <div className="bg-background-card dark:bg-background-card-dark rounded-2xl shadow-sm border border-border dark:border-border-dark overflow-hidden min-h-[300px]">
             
             {/* VIEW MOBILE: LIST CARD */}
             <div className="block lg:hidden">
@@ -351,13 +349,13 @@ export default function Transactions() {
             {/* VIEW DESKTOP: TABLE */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50/50 sticky top-0 z-10">
+                <thead className=" sticky top-0 z-10">
                   <tr>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori & Akun</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Jumlah</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
+                    <th className="p-4 text-xs font-semibold text-text-grey dark:text-text-grey-dark uppercase tracking-wider">Tanggal</th>
+                    <th className="p-4 text-xs font-semibold text-text-grey dark:text-text-grey-dark uppercase tracking-wider">Kategori & Akun</th>
+                    <th className="p-4 text-xs font-semibold text-text-grey dark:text-text-grey-dark uppercase tracking-wider">Deskripsi</th>
+                    <th className="p-4 text-xs font-semibold text-text-grey dark:text-text-grey-dark uppercase tracking-wider text-right">Jumlah</th>
+                    <th className="p-4 text-xs font-semibold text-text-grey dark:text-text-grey-dark uppercase tracking-wider text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -369,7 +367,7 @@ export default function Transactions() {
                     transactions.map((tx) => (
                       <tr key={tx.transaction_id} className="hover:bg-gray-50/50 transition">
                         <td className="p-4 align-top">
-                          <div className="text-sm font-medium text-gray-700">{formatDate(tx.date)}</div>
+                          <div className="text-sm font-medium text-text-black dark:text-text-white">{formatDate(tx.date)}</div>
                           <div className="text-xs text-gray-400 mt-0.5">
                             {new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                           </div>
@@ -380,13 +378,13 @@ export default function Transactions() {
                                 {tx.type === 'income' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-800">{tx.category_name || "Tanpa Kategori"}</p>
-                                <p className="text-xs text-gray-500">{tx.account_name} • {tx.wallet_name}</p>
+                                <p className="text-sm font-semibold text-text-black dark:text-text-white">{tx.category_name || "Tanpa Kategori"}</p>
+                                <p className="text-xs text-gray-400">{tx.account_name} • {tx.wallet_name}</p>
                             </div>
                           </div>
                         </td>
                         <td className="p-4 align-top">
-                          <p className="text-sm text-gray-600 line-clamp-2">{tx.description || "-"}</p>
+                          <p className="text-sm text-text-black dark:text-text-white line-clamp-2">{tx.description || "-"}</p>
                         </td>
                         <td className="p-4 align-top text-right">
                           <span className={`text-sm font-bold px-3 py-1 rounded-full ${
@@ -397,10 +395,10 @@ export default function Transactions() {
                         </td>
                         <td className="p-4 align-top text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <button onClick={() => handleEditClick(tx)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                            <button onClick={() => handleEditClick(tx)} className="p-2 text-text-black dark:text-text-white hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                               <Edit size={16} />
                             </button>
-                            <button onClick={() => handleDelete(tx.transaction_id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
+                            <button onClick={() => handleDelete(tx.transaction_id)} className="p-2 text-text-black dark:text-text-white hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -413,9 +411,9 @@ export default function Transactions() {
             </div>
 
             {/* PAGINATION FOOTER */}
-            <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30 sticky bottom-0 bg-white z-10">
-              <span className="text-sm text-gray-500 text-center sm:text-left">
-                Halaman <span className="font-bold text-gray-800">{pagination.page}</span> dari {pagination.totalPages}
+            <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-0 z-10">
+              <span className="text-sm text-text-grey dark:text-text-grey-dark text-center sm:text-left">
+                Halaman <span className="font-bold text-text-black dark:text-text-white">{pagination.page}</span> dari {pagination.totalPages}
               </span>
               
               <div className="flex gap-2">

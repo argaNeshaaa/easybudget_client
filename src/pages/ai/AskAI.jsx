@@ -70,25 +70,25 @@ export default function AskAI() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#F3F4F6] font-gabarito overflow-hidden flex flex-col">
+    <div className="h-screen w-screen font-gabarito overflow-hidden flex flex-col">
       <Sidebar />
       <Header />
 
       {/* --- MAIN CONTENT CONTAINER --- */}
       {/* Mobile: Full Width, Desktop: Offset left for sidebar */}
-      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 bg-[#E5E9F1] p-4 lg:p-6 z-0">
+      <div className="fixed top-[5rem] left-0 lg:left-[18%] right-0 bottom-0 bg-background dark:bg-background-dark p-4 lg:p-6 z-0">
         
         {/* CHAT CARD WRAPPER */}
-        <div className="relative bg-white w-full h-full max-w-[1920px] mx-auto rounded-2xl shadow-lg flex flex-col overflow-hidden border border-gray-100">
+        <div className="relative bg-background-box dark:bg-background-box-dark w-full h-full max-w-[1920px] mx-auto rounded-2xl shadow-lg flex flex-col overflow-hidden border border-border dark:border-border-dark">
           
           {/* HEADER CHAT */}
-          <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-white z-10 shrink-0">
+          <div className="p-4 border-b border-border dark:border-border-dark flex justify-between items-center bg-background-card dark:bg-background-card-dark z-10 shrink-0">
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-full text-blue-600">
                     <Sparkles size={20} />
                 </div>
                 <div>
-                    <h2 className="font-bold text-gray-800 text-base md:text-lg">Tanya Natan</h2>
+                    <h2 className="font-bold text-text-black dark:text-text-white text-base md:text-lg">Tanya Natan</h2>
                     <p className="text-[10px] md:text-xs text-gray-400 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse"></span>
                         Online • Powered by Gemini
@@ -105,7 +105,7 @@ export default function AskAI() {
           </div>
 
           {/* AREA PESAN (SCROLLABLE) */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 bg-gray-50/50 scroll-smooth">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 scroll-smooth">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -170,14 +170,14 @@ export default function AskAI() {
           </div>
 
           {/* INPUT AREA */}
-          <div className="p-3 md:p-4 bg-white border-t border-gray-100 shrink-0">
+          <div className="p-3 md:p-4 bg-background-card dark:bg-background-card-dark border-t border-border dark:border-border-dark shrink-0">
             <form 
                 onSubmit={handleSend}
-                className="flex items-center gap-2 md:gap-3 bg-gray-100 p-1.5 md:p-2 rounded-full border border-transparent focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition"
+                className="flex items-center gap-2 md:gap-3 bg-background-box dark:bg-background-box-dark p-1.5 md:p-2 rounded-full border border-transparent focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition"
             >
               <input
                 type="text"
-                className="flex-1 bg-transparent px-3 md:px-4 py-2 outline-none text-gray-700 text-sm"
+                className="flex-1 bg-transparent px-3 md:px-4 py-2 outline-none text-text-grey dark:text-text-grey-dark text-sm placeholder-text-grey dark:placeholder-text-grey-dark"
                 placeholder="Ketik pesan..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
